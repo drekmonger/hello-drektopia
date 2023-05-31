@@ -17,7 +17,7 @@ export async function getPreviousThing(commentID: string, metadata: Metadata | u
   const parentId = (await reddit.getCommentById(commentID, metadata)).parentId;
 
   if (parentId.slice(0, 2) === "t1") {
-    return await reddit.getCommentById(commentID, metadata);
+    return await reddit.getCommentById(parentId, metadata);
 
   }
 

@@ -8,31 +8,43 @@ interface CommandDictionary {
     [name: string]: Command;
 }
 
+type ParsedCommandResult =
+  | { type: 'command'; command: Command }
+  | { type: 'help' }
+  | { type: 'invalid'; invalidCommand: string }
+  | { type: 'none' };
 
-export function parseCommand(body: string): Command | false {
+export function parseCommand(body: string): ParsedCommandResult {
     // Remove leading and trailing white spaces
     body = body.trim();
 
     // Check if the comment starts with "!"
     if (!body.startsWith('!')) {
-        return false;
+        return { type: 'none' };
     }
 
     // Extract the command
     let command = body.split(' ')[0].slice(1).toUpperCase();
 
+    if (command === "!help") 
+    {
+        return {type: 'help'};
+    }
 
     // Check if the command is in the dictionary
     if (command in commands) {
-        return commands[command];
+        return {type: 'command', command: commands[command]};
     } else {
-        return false;
+        return { type: 'invalid', invalidCommand: command };
     }
 }
 
 export function createCommandListMessage(): string {
     // Start with a friendly, casual intro message
     let message = "Hey. Here's a list of commands you can use in this subbreddit. Simply type '!' before the command name (case doesn't matter). Have fun!\n\n";
+
+    // add the help command to the message
+    message += `* !help --- This message.`
 
     // Now add each command to the message
     for (let name in commands) {
@@ -78,8 +90,6 @@ const commands: CommandDictionary = {
         description: "Generates a unique idea or insight based on the comment.",
         codeformat: false
     },
-
-
 
     "HAIKU": {
         prompt: "You will be prompted with a comment from reddit. Use that comment as inspiration to write a relevant haiku. Only output a haiku, and nothing else.",

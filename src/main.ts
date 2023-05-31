@@ -1,7 +1,7 @@
 import { Context, Devvit, RedditAPIClient, UserContext, KeyValueStorage } from '@devvit/public-api';
-import { Metadata } from '@devvit/protos';
+import { Metadata  } from '@devvit/protos';
 
-import { setupSettings } from './configurationSettings.js';
+import { AppSettings, setupSettings } from './configurationSettings.js';
 import { handleCounterInstall as counterInstall, resetHourlyCounter, queryCounters, resetCounters, Counters } from './rateLimitCounter.js'
 import { parseCommand, createCommandListMessage } from './commands.js';
 import { replyWithAIGeneratedComment } from './replyWithAIGeneratedComment.js';
@@ -32,7 +32,7 @@ Devvit.addSchedulerHandler({
 });
 
 
-//Usage report moderation action
+//Usage report -- moderation action
 Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MODERATOR,
@@ -77,7 +77,7 @@ Devvit.addAction({
   }
 });
 
-//Usage reset moderator action
+//Usage reset -- moderator action
 Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MODERATOR,
@@ -102,7 +102,7 @@ Devvit.addAction({
   }
 });
 
-//Block posting any comments for a post moderation action
+//Block posting any comments for a post -- moderation action
 Devvit.addAction({
   context: Context.POST,
   userContext: UserContext.MODERATOR,
@@ -111,7 +111,7 @@ Devvit.addAction({
   handler: async (event, metadata) => {
     try {
 
-      const postId = event.post.id;
+      const postId = "t3_" + event.post.id;
 
       if ((typeof (postId) === "undefined")) {
         throw new Error("Unable to get postID.")
@@ -131,7 +131,7 @@ Devvit.addAction({
         await kv.put('noAIposts', noAIposts);
       }
 
-      return { success: true, message: `${appName}: The bot will refuse to comment on this post.` };
+      return { success: true, message: `${appName}: Will refuse to comment within this post.` };
 
     }
 
@@ -146,7 +146,7 @@ Devvit.addAction({
 });
 
 
-//Send command list user action
+//Send command list -- user action
 Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MEMBER,
@@ -183,7 +183,7 @@ Devvit.addAction({
 });
 
 
-//Comment when requested by a moderator action
+//Comment when requested -- moderator action
 Devvit.addAction({
   context: Context.COMMENT,
   userContext: UserContext.MODERATOR,
@@ -213,7 +213,7 @@ Devvit.addAction({
   }
 });
 
-//Comment when a new comment appears on sub (check for !commands and random chance)
+//Comment when a new comment appears on sub (check for !commands and random chance) -- comment trigger
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
   async handler(event, metadata?: Metadata) {
@@ -234,22 +234,11 @@ Devvit.addTrigger({
 
       const settings = await getValidatedSettings(metadata);
 
-      //first check if there were any !commands in the comment, should always return false if commands are turned off in settings
+      //first check if there were any !commands in the comment
       if (settings.enablecommands) {
-        let command = parseCommand(event.comment?.body)
-
-        if (command) {
-
-          console.log(`Attempting reply with AI generated post to comment: ${commentID} in response to a !command.`)
-
-          const thingToSend = await getPreviousThing(commentID, metadata);
-
-          await replyWithAIGeneratedComment({ commentID, thingToConsider: thingToSend, systemText: command.prompt, formatResponse: command.codeformat, metadata, settings });
-
-          console.log(`Posted an AI generated reply to comment ${commentID} in response to a !command.`)
-
-          //don't check for random chance of posting comment after a !command; we're done
-          return { success: true };
+        const commandExecuted = await handleCommands(event.comment?.body, commentID, metadata, settings);
+        if (commandExecuted) {
+          return {success: true}
         }
       }
 
@@ -270,7 +259,8 @@ Devvit.addTrigger({
     }
 
     catch (error) {
-      const message = `{appName} Error: + {e.message}`;
+      const e = error as Error;
+      const message = `${appName} Error: + ${e.message}`;
       console.log(message)
       return { success: false, message: message };
     }
@@ -278,5 +268,40 @@ Devvit.addTrigger({
   }
 });
 
+
+async function handleCommands(body: string, commentID: string, metadata: Metadata | undefined, settings: AppSettings) : Promise<Boolean> {
+  
+  let parsedCommand = parseCommand(body);
+
+  switch (parsedCommand.type) {
+    case 'command':
+      console.log(`Attempting reply with AI generated post to comment: ${commentID} in response to a !command.`);
+
+      const thingToSend = await getPreviousThing(commentID, metadata);
+
+      await replyWithAIGeneratedComment({ commentID, thingToConsider: thingToSend, systemText: parsedCommand.command.prompt, formatResponse: parsedCommand.command.codeformat, metadata, settings });
+
+      console.log(`Posted an AI generated reply to comment ${commentID} in response to a !command.`);
+
+      //don't check for random chance of posting comment after a !command; we're done
+      return true;
+
+    case 'help':
+      await reddit.submitComment({ id: commentID, text: createCommandListMessage() }, metadata);
+      console.log(`Posted help message to comment ${commentID} in response to !help.`);
+      return true;
+
+    case 'invalid':
+      // Do absolutely nothing.
+      return true;
+
+    case 'none':
+      // Do nothing, and allow the next check to occur
+      return false;
+
+  }
+  
+
+}
 
 export default Devvit;
