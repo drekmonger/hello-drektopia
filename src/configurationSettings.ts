@@ -1,6 +1,6 @@
-import {SettingsFormField } from '@devvit/public-api/settings/types.js';
+import { SettingsFormField } from '@devvit/public-api/settings/types.js';
 
-export function setupSettings() : SettingsFormField [] {
+export function setupSettings(): SettingsFormField[] {
   return [
     {
       type: 'boolean',
@@ -84,6 +84,8 @@ export function setupSettings() : SettingsFormField [] {
       defaultValue: 5000,
       onValidate: (event) => {
         return Validate_Integers(event.value!);
+
+      }
     },
 
 
@@ -99,7 +101,7 @@ export function setupSettings() : SettingsFormField [] {
       label: "Percent chance of response to a comment made on the sub (0 to 100) (set to zero to turn this feature off):",
       defaultValue: 0,
       onValidate: (event) => {
-        if (event.value! > 100 || event.value! < 0) {return 'Should be a number 0 to 100, representing 0% to 100% chance.'};
+        if (event.value! > 100 || event.value! < 0) { return 'Should be a number 0 to 100, representing 0% to 100% chance.' };
       }
     },
 
@@ -131,17 +133,17 @@ export interface AppSettings {
 }
 export function isAppSettings(obj: any): obj is AppSettings {
   return obj !== null;
-   /* obj !== null &&
-    typeof obj === 'object' &&
-    typeof obj.acceptance === 'boolean' &&
-    typeof obj.model === 'string' &&
-    typeof obj.prompt === 'string' &&
-    typeof obj.key === 'string' &&
-    typeof obj.temperature === 'number' &&
-    typeof obj.maxhour === 'number' &&
-    typeof obj.maxday === 'number'  &&
-    typeof obj.enablecommands === 'boolean' &&
-    typeof obj.chanceof === 'number'
+  /* obj !== null &&
+   typeof obj === 'object' &&
+   typeof obj.acceptance === 'boolean' &&
+   typeof obj.model === 'string' &&
+   typeof obj.prompt === 'string' &&
+   typeof obj.key === 'string' &&
+   typeof obj.temperature === 'number' &&
+   typeof obj.maxhour === 'number' &&
+   typeof obj.maxday === 'number'  &&
+   typeof obj.enablecommands === 'boolean' &&
+   typeof obj.chanceof === 'number'
 */
 
   ;
