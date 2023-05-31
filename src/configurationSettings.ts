@@ -58,7 +58,7 @@ export function setupSettings(): SettingsFormField[] {
     {
       type: 'number',
       name: 'maxcharacters',
-      label: "Maximum character count of comments to reply to (10,000 is the max character count of a reddit comment, which is usually in a range of 1,500 to 2500 tokens. ChatGPT3.5 has a context length of 4096 tokens.): ",
+      label: "Maximum character count of comments to reply to (10,000 is the max character count of a reddit comment, which is usually in a ballpark of 2,000 tokens. ChatGPT3.5 has a context length of 4096 tokens. Note, longer inputs means more cost and longer inference. Very long inferences can time out -- 30 seconds max): ",
       defaultValue: 10000,
       onValidate: (event) => {
         return Validate_Integers(event.value!);
@@ -87,7 +87,6 @@ export function setupSettings(): SettingsFormField[] {
 
       }
     },
-
 
     {
       type: 'boolean',
@@ -133,7 +132,12 @@ export interface AppSettings {
 }
 export function isAppSettings(obj: any): obj is AppSettings {
   return obj !== null;
-  /* obj !== null &&
+
+  /* 
+  TODO: figure out why this assertation sometimes randomly fails
+  TODO: decide what to do when a key is undefined.
+  TODO: update this asseration to reflect the current interface
+  obj !== null &&
    typeof obj === 'object' &&
    typeof obj.acceptance === 'boolean' &&
    typeof obj.model === 'string' &&

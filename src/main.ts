@@ -271,7 +271,7 @@ Devvit.addTrigger({
   }
 });
 
-//Summarize long posts -- post trigger
+//Summarize long posts -- post trigger TODO
 
 
 async function handleCommands(body: string, commentID: string, metadata: Metadata | undefined, settings: AppSettings) : Promise<Boolean> {
