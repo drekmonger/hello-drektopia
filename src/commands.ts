@@ -26,7 +26,7 @@ export function parseCommand(body: string): ParsedCommandResult {
     // Extract the command
     let command = body.split(' ')[0].slice(1).toUpperCase();
 
-    if (command === "!help") 
+    if (command === "!HELP") 
     {
         return {type: 'help'};
     }

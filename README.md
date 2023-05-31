@@ -20,8 +20,8 @@ Also, for the future, it would be nice to have a single user action that pulls u
 4. **Safety Measures:** Several safeguards are in place to maintain a respectful environment and help prevent token misuse:
 
     - **Rate Limiting:** The app features both hourly and daily rate limits. Future iterations may also include user-based rate limiting.
-    - **Anti-Jailbreak:** Some simple prompt-crafting reduces the risk of the AI model being jailbroken by user comments.
-    - **Content Moderation:** User content is first sent to OpenAI's moderation endpoint to ensure compliance with guidelines. (and so that ChatGPT doesn't have to blush at adult-themed content)
+    - **Anti-Jailbreak:** Built-in prompt-crafting reduces the risk of the AI model being jailbroken by user comments.
+    - **Content Moderation:** User content is first sent to OpenAI's moderation endpoint to ensure compliance with guidelines. (and also so that ChatGPT doesn't have to blush at adult-themed content)
     - **Comment Blocking:** Moderators have the ability to block the app from commenting on selected posts via a moderator action, maintaining appropriateness in sensitive threads.
     - **Length Limit:** A setting is available to prevent the app from responding to messages over a certain length, helping to prevent unnecessary token usage.
 
