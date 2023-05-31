@@ -24,6 +24,7 @@ Devvit.addTrigger({
   }
 });
 
+
 Devvit.addSchedulerHandler({
   type: "reset_hourly_counter",
   handler: async (_, metadata) => {
@@ -77,6 +78,7 @@ Devvit.addAction({
   }
 });
 
+
 //Usage reset -- moderator action
 Devvit.addAction({
   context: Context.SUBREDDIT,
@@ -101,6 +103,7 @@ Devvit.addAction({
 
   }
 });
+
 
 //Block posting any comments for a post -- moderation action
 Devvit.addAction({
@@ -183,7 +186,7 @@ Devvit.addAction({
 });
 
 
-//Comment when requested -- moderator action
+//Make a comment when requested -- moderator action
 Devvit.addAction({
   context: Context.COMMENT,
   userContext: UserContext.MODERATOR,
@@ -213,7 +216,7 @@ Devvit.addAction({
   }
 });
 
-//Comment when a new comment appears on sub (check for !commands and random chance) -- comment trigger
+//Make a comment when a new comment appears on sub (check for !commands and random chance) -- comment trigger
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
   async handler(event, metadata?: Metadata) {
@@ -268,6 +271,8 @@ Devvit.addTrigger({
   }
 });
 
+//Summarize long posts -- post trigger
+
 
 async function handleCommands(body: string, commentID: string, metadata: Metadata | undefined, settings: AppSettings) : Promise<Boolean> {
   
@@ -279,7 +284,7 @@ async function handleCommands(body: string, commentID: string, metadata: Metadat
 
       const thingToSend = await getPreviousThing(commentID, metadata);
 
-      await replyWithAIGeneratedComment({ commentID, thingToConsider: thingToSend, systemText: parsedCommand.command.prompt, formatResponse: parsedCommand.command.codeformat, metadata, settings });
+      await replyWithAIGeneratedComment({ commentID, thingToConsider: thingToSend, systemText: parsedCommand.prompt, formatResponse: parsedCommand.codeformat, metadata, settings });
 
       console.log(`Posted an AI generated reply to comment ${commentID} in response to a !command.`);
 
@@ -303,5 +308,7 @@ async function handleCommands(body: string, commentID: string, metadata: Metadat
   
 
 }
+
+//
 
 export default Devvit;

@@ -41,7 +41,7 @@ export function setupSettings() : SettingsFormField [] {
       label: "Maximum API calls per hour: ",
       defaultValue: 3,
       onValidate: (event) => {
-        return Validate_Maximums(event.value!);
+        return Validate_Integers(event.value!);
       }
     },
 
@@ -51,18 +51,39 @@ export function setupSettings() : SettingsFormField [] {
       label: "Maximum API calls per day: ",
       defaultValue: 9,
       onValidate: (event) => {
-        return Validate_Maximums(event.value!);
+        return Validate_Integers(event.value!);
       }
     },
 
     {
       type: 'number',
       name: 'maxcharacters',
-      label: "Maximum character count of posts/comments to reply to (1000 to 2000 is reasonable): ",
-      defaultValue: 3,
+      label: "Maximum character count of comments to reply to (10,000 is the max character count of a reddit comment, which is usually in a range of 1,500 to 2500 tokens. ChatGPT3.5 has a context length of 4096 tokens.): ",
+      defaultValue: 10000,
       onValidate: (event) => {
-        return Validate_Maximums(event.value!);
+        return Validate_Integers(event.value!);
       }
+    },
+
+    {
+      type: 'boolean',
+      name: 'enablesummarizationforposts',
+      label: "Enable/Disable watching for long posts to summarize."
+    },
+
+    {
+      type: 'boolean',
+      name: 'enablesummarizationforcomments',
+      label: "Enable/Disable watching for long comments to summarize."
+    },
+
+    {
+      type: 'number',
+      name: 'summarizationthreshold',
+      label: "Minimum character count of posts/comments to auto-summarize. (10,000 is the max character count of a reddit comment): ",
+      defaultValue: 5000,
+      onValidate: (event) => {
+        return Validate_Integers(event.value!);
     },
 
 
@@ -75,7 +96,8 @@ export function setupSettings() : SettingsFormField [] {
     {
       type: 'number',
       name: 'chanceof',
-      label: "Percent chance of response to a comment made on the sub (0 to 100) (if there are remaining uses):",
+      label: "Percent chance of response to a comment made on the sub (0 to 100) (set to zero to turn this feature off):",
+      defaultValue: 0,
       onValidate: (event) => {
         if (event.value! > 100 || event.value! < 0) {return 'Should be a number 0 to 100, representing 0% to 100% chance.'};
       }
@@ -87,7 +109,7 @@ export function setupSettings() : SettingsFormField [] {
 }
 
 
-function Validate_Maximums(n: number): void | string {
+function Validate_Integers(n: number): void | string {
   if (n < 0) { return "A negative number doesn't make sense here."; }
   if (!Number.isInteger(n)) { return "Should be an integer."; }
 
@@ -101,6 +123,9 @@ export interface AppSettings {
   maxhour: number;
   maxday: number;
   maxcharacters: number;
+  enablesummarizationforposts: number;
+  enablesummarizationforcomments: number;
+
   enablecommands: boolean;
   chanceof: number
 }
