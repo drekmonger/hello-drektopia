@@ -7,7 +7,12 @@ import {
 } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 
-import { AppSettings, setupSettings } from "./configurationSettings.js";
+import {
+  AppSettings,
+  setupSettings,
+  getValidatedSettings,
+} from "./configurationSettings.js";
+
 import {
   handleCounterInstall as counterInstall,
   resetHourlyCounter,
@@ -15,14 +20,10 @@ import {
   resetCounters,
   Counters,
 } from "./rateLimitCounter.js";
+
 import { parseCommand, createCommandListMessage } from "./commands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
-import {
-  getValidatedSettings,
-  getPreviousThing,
-  chanceTrue,
-  ReportError
-} from "./utility.js";
+import { getPreviousThing, chanceTrue, ReportError } from "./utility.js";
 
 export const appName: string = "Drektopia-hello";
 
@@ -271,7 +272,6 @@ Devvit.addTrigger({
     }
   },
 });
-
 
 //Summarize long posts -- post trigger TODO
 

@@ -1,7 +1,6 @@
 import { getSettings } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 import { RedditContent } from "./RedditContentType.js";
-import { isAppSettings } from "./configurationSettings.js";
 import { reddit, appName } from "./main.js";
 
 //Utility functions
@@ -25,22 +24,6 @@ export async function getPreviousThing(
   }
 
   return await reddit.getPostById(parentId, metadata);
-}
-
-export async function getValidatedSettings(metadata: Metadata | undefined) {
-  const settings = await getSettings(metadata);
-
-  if (!isAppSettings(settings)) {
-    throw new Error(
-      "Invalid settings.  Ensure that all of the configuration settings for the app are set correctly."
-    );
-  }
-
-  if (!settings.acceptance) {
-    throw new Error("Check the settings for important configuration details.");
-  }
-
-  return settings;
 }
 
 export function ReportError(error: unknown) {

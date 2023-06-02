@@ -1,4 +1,6 @@
+import { getSettings } from "@devvit/public-api";
 import { SettingsFormField } from "@devvit/public-api/settings/types.js";
+import { Metadata } from "@devvit/protos";
 
 export function setupSettings(): SettingsFormField[] {
   return [
@@ -156,4 +158,20 @@ export function isAppSettings(obj: any): obj is AppSettings {
    typeof obj.enablecommands === 'boolean' &&
    typeof obj.chanceof === 'number'
 */
+}
+
+export async function getValidatedSettings(metadata: Metadata | undefined) {
+  const settings = await getSettings(metadata);
+
+  if (!isAppSettings(settings)) {
+    throw new Error(
+      "Invalid settings.  Ensure that all of the configuration settings for the app are set correctly."
+    );
+  }
+
+  if (!settings.acceptance) {
+    throw new Error("Check the settings for important configuration details.");
+  }
+
+  return settings;
 }
