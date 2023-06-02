@@ -1,4 +1,3 @@
-import { getSettings } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 import { RedditContent } from "./RedditContentType.js";
 import { reddit, appName } from "./main.js";
