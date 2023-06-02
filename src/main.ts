@@ -14,12 +14,11 @@ import {
 } from "./configurationSettings.js";
 
 import {
-  rateLimitCounterInstall,
+  rateLimitCounterInstall as installRateLimitCounter,
   resetHourlyCounter,
   usageReportHandler,
-  resetCountersHandler
+  resetCountersHandler,
 } from "./rateLimitCounter.js";
-
 
 import { parseCommand, createCommandListMessage } from "./commands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
@@ -36,16 +35,12 @@ Devvit.addSettings(setupSettings());
 
 Devvit.addTrigger({
   event: Devvit.Trigger.AppInstall,
-  handler: async (_, metadata) => {
-    rateLimitCounterInstall(metadata);
-  },
+  handler: async (_, metadata) => installRateLimitCounter(metadata),
 });
 
 Devvit.addSchedulerHandler({
   type: "reset_hourly_counter",
-  handler: async (_, metadata) => {
-    return await resetHourlyCounter(kv, metadata);
-  },
+  handler: async (_, metadata) => resetHourlyCounter(kv, metadata),
 });
 
 //Usage report -- moderation action
@@ -53,7 +48,8 @@ Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MODERATOR,
   name: `${appName} Usage Report`,
-  description: "Sends the user a private message reporting the current usage stats.",
+  description:
+    "Sends the user a private message reporting the current usage stats.",
   handler: async (_, metadata) => usageReportHandler(metadata),
 });
 
@@ -233,8 +229,6 @@ Devvit.addTrigger({
     }
   },
 });
-
-
 
 //Summarize long posts -- post trigger TODO
 
