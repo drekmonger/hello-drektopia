@@ -20,7 +20,7 @@ import {
   resetCountersHandler,
 } from "./rateLimitCounter.js";
 
-import { parseCommand, createCommandListMessage } from "./commands.js";
+import { parseCommand, createCommandListMessage } from "./userCommands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
 import { getPreviousThing, chanceTrue, ReportError } from "./utility.js";
 
