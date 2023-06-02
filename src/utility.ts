@@ -1,6 +1,6 @@
 import { getSettings } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
-import { redditPostOrComment } from "./redditPostOrComment.js";
+import { RedditContent } from "./RedditContentType.js";
 import { isAppSettings } from "./configurationSettings.js";
 import { reddit } from "./main.js";
 
@@ -17,7 +17,7 @@ export function chanceTrue(percentage: number): boolean {
 export async function getPreviousThing(
   commentID: string,
   metadata: Metadata | undefined
-): Promise<redditPostOrComment> {
+): Promise<RedditContent> {
   const parentId = (await reddit.getCommentById(commentID, metadata)).parentId;
 
   if (parentId.slice(0, 2) === "t1") {

@@ -1,5 +1,5 @@
 import { Metadata } from "@devvit/protos";
-import { redditPostOrComment, isComment } from "./redditPostOrComment.js";
+import { RedditContent, isComment } from "./RedditContentType.js";
 import {
   simpleChatCompletion,
   checkModeration,
@@ -19,7 +19,7 @@ export async function replyWithAIGeneratedComment({
   settings,
 }: {
   commentID: string;
-  thingToConsider: redditPostOrComment;
+  thingToConsider: RedditContent;
   systemText: string;
   formatResponse: boolean;
   metadata: Metadata | undefined;
@@ -85,28 +85,34 @@ export async function replyWithAIGeneratedComment({
 
   await incrementCounters(kv, metadata);
 }
+ 
 
 async function checkRestrictions(
-  postOrComment: redditPostOrComment,
+  postOrComment: RedditContent,
   settings: AppSettings,
   metadata: Metadata | undefined
 ): Promise<string | false> {
+  //done
   if (postOrComment.body == undefined) {
     return "There's no text to respond to. This won't work for image or link posts.";
   }
 
+  //done
   if (postOrComment.isLocked()) {
     return "This is locked, and should not be replied to.";
   }
 
+  //done
   if (postOrComment.isRemoved()) {
     return "This is removed, and should not be replied to.";
   }
 
+  //done
   if (postOrComment.isSpam()) {
     return "This is spam, and should not be replied to.";
   }
 
+  //done with bug
   //check if post is blocked off from recieving comments
   const postId = isComment(postOrComment)
     ? postOrComment.postId
