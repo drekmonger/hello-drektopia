@@ -4,6 +4,8 @@ import {
   RedditAPIClient,
   UserContext,
   KeyValueStorage,
+  SubredditContextActionEvent,
+  ContextActionResponse,
 } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 
@@ -14,12 +16,16 @@ import {
 } from "./configurationSettings.js";
 
 import {
-  handleCounterInstall as counterInstall,
+  handleCounterInstall as counterInstallHandler,
   resetHourlyCounter,
   queryCounters,
   resetCounters,
   Counters,
 } from "./rateLimitCounter.js";
+
+import {
+ usageReportHandler,
+} from "./taskHandlers.js"
 
 import { parseCommand, createCommandListMessage } from "./commands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
@@ -28,8 +34,8 @@ import { getPreviousThing, chanceTrue, ReportError } from "./utility.js";
 export const appName: string = "Hello-drektopia";
 
 //App Setup
-export const reddit = new RedditAPIClient();
 Devvit.use(Devvit.Types.HTTP);
+export const reddit = new RedditAPIClient();
 export const kv = new KeyValueStorage();
 
 Devvit.addSettings(setupSettings());
@@ -37,7 +43,7 @@ Devvit.addSettings(setupSettings());
 Devvit.addTrigger({
   event: Devvit.Trigger.AppInstall,
   handler: async (_, metadata) => {
-    counterInstall(metadata);
+    counterInstallHandler(metadata);
   },
 });
 
@@ -53,36 +59,8 @@ Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MODERATOR,
   name: `${appName} Usage Report`,
-  description: "Sends the user a PM reporting the current usage stats.",
-  handler: async (_, metadata) => {
-    try {
-      const settings = await getValidatedSettings(metadata);
-
-      const currentUser = await reddit.getCurrentUser(metadata);
-
-      const counters = (await queryCounters(kv, metadata)) as Counters;
-
-      const messageBody = `**Requested usage report from ${appName}:**
-
-      * Uses this hour: ${counters[0]} -- Max per hour: ${settings.maxhour}
-      * Uses today: ${counters[1]} -- Max per day: ${settings.maxday}
-      * Lifetime uses: ${counters[2]}
-      `;
-
-      await reddit.sendPrivateMessage(
-        {
-          to: currentUser.username,
-          subject: "Usage Stats",
-          text: messageBody,
-        },
-        metadata
-      );
-
-      return { success: true, message: "Sent usage report." };
-    } catch (error) {
-      return ReportError(error);
-    }
-  },
+  description: "Sends the user a private message reporting the current usage stats.",
+  handler: async (_, metadata) => usageReportHandler(_, metadata),
 });
 
 //Usage reset -- moderator action
@@ -272,6 +250,8 @@ Devvit.addTrigger({
     }
   },
 });
+
+
 
 //Summarize long posts -- post trigger TODO
 
