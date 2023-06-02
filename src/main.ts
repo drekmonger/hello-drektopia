@@ -25,7 +25,7 @@ import { parseCommand, createCommandListMessage } from "./commands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
 import { getPreviousThing, chanceTrue, ReportError } from "./utility.js";
 
-export const appName: string = "Drektopia-hello";
+export const appName: string = "Hello-drektopia";
 
 //App Setup
 export const reddit = new RedditAPIClient();
