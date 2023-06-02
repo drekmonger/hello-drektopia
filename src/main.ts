@@ -5,6 +5,7 @@ import {
   UserContext,
   KeyValueStorage,
 } from "@devvit/public-api";
+
 import { Metadata } from "@devvit/protos";
 
 import {
@@ -23,7 +24,7 @@ import {
 import { blockAICommentsHandler as blockAICommentsOnPost, createCommentHandler as createAIComment } from "./basicAIComment.js"
 
 
-import { parseCommand, createCommandListMessage } from "./userCommands.js";
+import { sendUserCommandHelpMessage, parseCommand, createCommandListMessage } from "./userCommands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
 
 
@@ -48,7 +49,7 @@ Devvit.addSchedulerHandler({
   handler: async (_, metadata) => resetHourlyCounter(kv, metadata),
 });
 
-//Usage report -- moderation action
+//Usage report -- moderation subreddit action
 Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MODERATOR,
@@ -58,7 +59,7 @@ Devvit.addAction({
   handler: async (_, metadata) => usageReport(metadata)
 });
 
-//Usage reset -- moderator action
+//Usage reset -- moderator subreddit action
 Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MODERATOR,
@@ -67,7 +68,7 @@ Devvit.addAction({
   handler: async (_, metadata) => resetCounters(metadata)
 });
 
-//Block AI comments on a post -- moderation action
+//Block AI comments on a post -- moderator post action
 Devvit.addAction({
   context: Context.POST,
   userContext: UserContext.MODERATOR,
@@ -77,7 +78,7 @@ Devvit.addAction({
   handler: async (event, metadata) => blockAICommentsOnPost(event, metadata)
 });
 
-//Create an AI generated comment -- moderator action
+//Create an AI generated comment -- moderator comment action
 Devvit.addAction({
   context: Context.COMMENT,
   userContext: UserContext.MODERATOR,
@@ -86,40 +87,18 @@ Devvit.addAction({
   handler: async (event, metadata) => createAIComment (event, metadata)
 });
 
-//Send command list -- user action
+//Send user command list via private message -- user subreddit action
 Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MEMBER,
   name: `${appName} Get a list of commands`,
-  description: "Private messages the user with a list of commands",
-  handler: async (_, metadata) => {
-    try {
-      const currentUser = await reddit.getCurrentUser(metadata);
-
-      const messageBody = createCommandListMessage();
-
-      await reddit.sendPrivateMessage(
-        {
-          to: currentUser.username,
-          subject: "Usage Stats",
-          text: messageBody,
-        },
-        metadata
-      );
-
-      return {
-        success: true,
-        message: `${appName}: Command list PMed to you!`,
-      };
-    } catch (error) {
-      return ReportError(error);
-    }
-  },
+  description: "Mssages the user with a list of commands",
+  handler: async (_, metadata) => sendUserCommandHelpMessage(metadata),
 });
 
 
 
-//Make a comment when a new comment appears on sub (check for !commands and random chance) -- comment trigger
+//Make a comment when a new comment appears on sub (check for summerization, user commands, random chance) -- comment trigger
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
   async handler(event, metadata?: Metadata) {

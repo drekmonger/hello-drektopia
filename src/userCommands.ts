@@ -1,3 +1,14 @@
+import { ContextActionResponse } from "@devvit/public-api";
+
+import { Metadata } from "@devvit/protos";
+
+import { appName, reddit } from "./main.js";
+import { ReportError } from "./utility.js";
+
+
+
+
+
 type UserCommand = {
   prompt: string;
   description: string;
@@ -60,6 +71,38 @@ export function createCommandListMessage(): string {
   return message;
 }
 
+//Handlers
+export async function sendUserCommandHelpMessage(
+  metadata: Metadata | undefined
+): Promise<ContextActionResponse>
+{
+  try {
+    const currentUser = await reddit.getCurrentUser(metadata);
+
+    const messageBody = createCommandListMessage();
+
+    await reddit.sendPrivateMessage(
+      {
+        to: currentUser.username,
+        subject: "Usage Stats",
+        text: messageBody,
+      },
+      metadata
+    );
+
+    return {
+      success: true,
+      message: `${appName}: Command list PMed to you!`,
+    };
+  } catch (error) {
+    return ReportError(error);
+  }
+}
+
+
+
+
+//The user commands.  TODO: Figure out a good way to make these defaults edittable in settings
 const commandCommonBoilerplate =
   "You will be prompted with a comment from reddit. ";
 
