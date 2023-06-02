@@ -16,11 +16,11 @@ import {
 import {
   rateLimitCounterInstall as installRateLimitCounter,
   resetHourlyCounter,
-  usageReportHandler,
-  resetCountersHandler,
+  usageReportHandler as usageReport,
+  resetCountersHandler as resetCounters,
 } from "./rateLimitCounter.js";
 
-import { blockAICommentsHandler, createCommentHandler } from "./basicAIComment.js"
+import { blockAICommentsHandler as blockAICommentsOnPost, createCommentHandler as createAIComment } from "./basicAIComment.js"
 
 
 import { parseCommand, createCommandListMessage } from "./userCommands.js";
@@ -55,7 +55,7 @@ Devvit.addAction({
   name: `${appName} Usage Report`,
   description:
     "Sends the user a private message reporting the current usage stats.",
-  handler: async (_, metadata) => usageReportHandler(metadata)
+  handler: async (_, metadata) => usageReport(metadata)
 });
 
 //Usage reset -- moderator action
@@ -64,7 +64,7 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} Reset Usage Counter`,
   description: "Resets the daily and hourly counters to 0.",
-  handler: async (_, metadata) => resetCountersHandler(metadata)
+  handler: async (_, metadata) => resetCounters(metadata)
 });
 
 //Block AI comments on a post -- moderation action
@@ -74,7 +74,7 @@ Devvit.addAction({
   name: `${appName} Block AI comments here`,
   description:
     "Sets a flag that prevents the application from posting comments on a chosen post.",
-  handler: async (event, metadata) => blockAICommentsHandler(event, metadata)
+  handler: async (event, metadata) => blockAICommentsOnPost(event, metadata)
 });
 
 //Create an AI generated comment -- moderator action
@@ -82,8 +82,8 @@ Devvit.addAction({
   context: Context.COMMENT,
   userContext: UserContext.MODERATOR,
   name: `${appName} AI Reply`,
-  description: "Reply to the comment with a new post from the AI model",
-  handler: async (event, metadata) => createCommentHandler (event, metadata)
+  description: "Reply to comment with an AI generated message",
+  handler: async (event, metadata) => createAIComment (event, metadata)
 });
 
 //Send command list -- user action
