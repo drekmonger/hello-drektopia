@@ -20,8 +20,13 @@ import {
   resetCountersHandler,
 } from "./rateLimitCounter.js";
 
+import { blockAICommentsHandler, createCommentHandler } from "./basicAIComment.js"
+
+
 import { parseCommand, createCommandListMessage } from "./userCommands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
+
+
 import { getPreviousThing, chanceTrue, ReportError } from "./utility.js";
 
 export const appName: string = "Hello-drektopia";
@@ -50,7 +55,7 @@ Devvit.addAction({
   name: `${appName} Usage Report`,
   description:
     "Sends the user a private message reporting the current usage stats.",
-  handler: async (_, metadata) => usageReportHandler(metadata),
+  handler: async (_, metadata) => usageReportHandler(metadata)
 });
 
 //Usage reset -- moderator action
@@ -59,47 +64,26 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} Reset Usage Counter`,
   description: "Resets the daily and hourly counters to 0.",
-  handler: async (_, metadata) => resetCountersHandler(metadata),
+  handler: async (_, metadata) => resetCountersHandler(metadata)
 });
 
-//Block posting comments on a post -- moderation action
+//Block AI comments on a post -- moderation action
 Devvit.addAction({
   context: Context.POST,
   userContext: UserContext.MODERATOR,
   name: `${appName} Block AI comments here`,
   description:
     "Sets a flag that prevents the application from posting comments on a chosen post.",
-  handler: async (event, metadata) => {
-    try {
-      const postId = "t3_" + event.post.id;
+  handler: async (event, metadata) => blockAICommentsHandler(event, metadata)
+});
 
-      if (typeof postId === "undefined") {
-        throw new Error("Unable to get postID.");
-      }
-
-      const noAIposts = (await kv.get("noAIposts", metadata)) as {
-        [postId: string]: boolean;
-      } | null;
-
-      // If the 'noAIposts' object doesn't exist yet, create it
-      if (!noAIposts) {
-        await kv.put("noAIposts", { [postId]: true });
-      }
-
-      // If it does exist, add the new post to it
-      else {
-        noAIposts[postId] = true;
-        await kv.put("noAIposts", noAIposts);
-      }
-
-      return {
-        success: true,
-        message: `${appName}: Will refuse to comment within this post.`,
-      };
-    } catch (error) {
-      return ReportError(error);
-    }
-  },
+//Create an AI generated comment -- moderator action
+Devvit.addAction({
+  context: Context.COMMENT,
+  userContext: UserContext.MODERATOR,
+  name: `${appName} AI Reply`,
+  description: "Reply to the comment with a new post from the AI model",
+  handler: async (event, metadata) => createCommentHandler (event, metadata)
 });
 
 //Send command list -- user action
@@ -133,37 +117,7 @@ Devvit.addAction({
   },
 });
 
-//Make a comment when requested -- moderator action
-Devvit.addAction({
-  context: Context.COMMENT,
-  userContext: UserContext.MODERATOR,
-  name: `${appName} AI Reply`,
-  description: "Reply to the comment with a new post from the AI model",
-  handler: async (event, metadata) => {
-    try {
-      const settings = await getValidatedSettings(metadata);
 
-      const commentID = "t1_" + event.comment?.id;
-
-      const comment = await reddit.getCommentById(commentID, metadata);
-
-      await replyWithAIGeneratedComment({
-        commentID,
-        thingToConsider: comment,
-        systemText: settings.prompt,
-        formatResponse: false,
-        metadata,
-        settings,
-      });
-      return {
-        success: true,
-        message: "Posted AI generated comment upon moderator request.",
-      };
-    } catch (error) {
-      return ReportError(error);
-    }
-  },
-});
 
 //Make a comment when a new comment appears on sub (check for !commands and random chance) -- comment trigger
 Devvit.addTrigger({
@@ -215,8 +169,8 @@ Devvit.addTrigger({
 
       await replyWithAIGeneratedComment({
         commentID,
-        thingToConsider: comment,
-        systemText: settings.prompt,
+        thingToRead: comment,
+        systemPrompt: settings.prompt,
         formatResponse: false,
         metadata,
         settings,
@@ -250,8 +204,8 @@ async function handleCommands(
 
       await replyWithAIGeneratedComment({
         commentID,
-        thingToConsider: thingToSend,
-        systemText: parsedCommand.prompt,
+        thingToRead: thingToSend,
+        systemPrompt: parsedCommand.prompt,
         formatResponse: parsedCommand.codeformat,
         metadata,
         settings,

@@ -12,26 +12,28 @@ const promptDelimiter = "##";
 
 export async function replyWithAIGeneratedComment({
   commentID,
-  thingToConsider,
-  systemText: systemPrompt,
+  thingToRead,
+  systemPrompt,
   formatResponse: formatResponse,
   metadata,
   settings,
 }: {
   commentID: string;
-  thingToConsider: RedditContent;
-  systemText: string;
+  thingToRead: RedditContent;
+  systemPrompt: string;
   formatResponse: boolean;
   metadata: Metadata | undefined;
   settings: AppSettings;
 }) {
-  const checks = await checkRestrictions(thingToConsider, settings, metadata);
+
+
+  const checks = await checkRestrictions(thingToRead, settings, metadata);
 
   if (checks) {
     throw new Error(checks);
   }
 
-  let body = thingToConsider.body;
+  let body = thingToRead.body;
 
   if (body == undefined) {
     throw new Error("Body of comment or post to respond to is empty.");

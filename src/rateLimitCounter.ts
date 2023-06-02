@@ -91,7 +91,6 @@ export async function incrementCounters(
 }
 
 //Action handlers
-
 export async function usageReportHandler(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
