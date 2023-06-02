@@ -2,7 +2,7 @@ import { getSettings } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 import { RedditContent } from "./RedditContentType.js";
 import { isAppSettings } from "./configurationSettings.js";
-import { reddit } from "./main.js";
+import { reddit, appName } from "./main.js";
 
 //Utility functions
 export function chanceTrue(percentage: number): boolean {
@@ -42,3 +42,11 @@ export async function getValidatedSettings(metadata: Metadata | undefined) {
 
   return settings;
 }
+
+export function ReportError(error: unknown) {
+  const e = error as Error;
+  const message = `${appName} Error: + ${e.message}`;
+  console.log(message);
+  return { success: false, message: message };
+}
+

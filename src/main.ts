@@ -21,6 +21,7 @@ import {
   getValidatedSettings,
   getPreviousThing,
   chanceTrue,
+  ReportError
 } from "./utility.js";
 
 export const appName: string = "Drektopia-hello";
@@ -78,10 +79,7 @@ Devvit.addAction({
 
       return { success: true, message: "Sent usage report." };
     } catch (error) {
-      const e = error as Error;
-      const message = `${appName} Error: + ${e.message}`;
-      console.log(message);
-      return { success: false, message };
+      return ReportError(error);
     }
   },
 });
@@ -101,10 +99,7 @@ Devvit.addAction({
         message: `${appName}: reset the hourly and daily usage counters to zero.`,
       };
     } catch (error) {
-      const e = error as Error;
-      const message = `${appName} Error: + ${e.message}`;
-      console.log(message);
-      return { success: false, message: message };
+      return ReportError(error);
     }
   },
 });
@@ -144,10 +139,7 @@ Devvit.addAction({
         message: `${appName}: Will refuse to comment within this post.`,
       };
     } catch (error) {
-      const e = error as Error;
-      const message = `${appName} Error: + ${e.message}`;
-      console.log(message);
-      return { success: false, message: message };
+      return ReportError(error);
     }
   },
 });
@@ -178,10 +170,7 @@ Devvit.addAction({
         message: `${appName}: Command list PMed to you!`,
       };
     } catch (error) {
-      const e = error as Error;
-      const message = `${appName} Error: + ${e.message}`;
-      console.log(message);
-      return { success: false, message: message };
+      return ReportError(error);
     }
   },
 });
@@ -213,10 +202,7 @@ Devvit.addAction({
         message: "Posted AI generated comment upon moderator request.",
       };
     } catch (error) {
-      const e = error as Error;
-      const message = `${appName} Error: + ${e.message}`;
-      console.log(message);
-      return { success: false, message: message };
+      return ReportError(error);
     }
   },
 });
@@ -281,13 +267,11 @@ Devvit.addTrigger({
       console.log(`Posted an AI generated reply to comment: ${commentID}.`);
       return { success: true };
     } catch (error) {
-      const e = error as Error;
-      const message = `${appName} Error: + ${e.message}`;
-      console.log(message);
-      return { success: false, message: message };
+      return ReportError(error);
     }
   },
 });
+
 
 //Summarize long posts -- post trigger TODO
 
