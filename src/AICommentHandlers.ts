@@ -4,7 +4,7 @@ import {
   CommentContextActionEvent
 } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
-import { ReportError } from "./utility.js";
+import { ReportError } from "./commonUtility.js";
 import { appName, kv, reddit } from "./main.js";
 import { getValidatedSettings } from "./configurationSettings.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";

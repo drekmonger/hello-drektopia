@@ -2,7 +2,7 @@ import { ContextActionResponse, Devvit, KeyValueStorage } from "@devvit/public-a
 import { Metadata } from "@devvit/protos";
 import { appName, kv, reddit } from "./main.js";
 import { getValidatedSettings } from "./configurationSettings.js";
-import { ReportError } from "./utility.js";
+import { ReportError } from "./commonUtility.js";
 
 const scheduler = Devvit.use(Devvit.Types.Scheduler);
 

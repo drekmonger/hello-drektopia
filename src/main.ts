@@ -21,14 +21,14 @@ import {
   resetCountersHandler as resetCounters,
 } from "./rateLimitCounter.js";
 
-import { blockAICommentsHandler as blockAICommentsOnPost, createCommentHandler as createAIComment } from "./basicAIComment.js"
+import { blockAICommentsHandler as blockAICommentsOnPost, createCommentHandler as createAIComment } from "./AICommentHandlers.js"
 
 
 import { sendUserCommandHelpMessage, parseCommand, createCommandListMessage } from "./userCommands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
 
 
-import { getPreviousThing, chanceTrue, ReportError } from "./utility.js";
+import { getPreviousThing, chanceTrue, ReportError } from "./commonUtility.js";
 
 export const appName: string = "Hello-drektopia";
 

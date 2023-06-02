@@ -3,7 +3,7 @@ import { ContextActionResponse } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 
 import { appName, reddit } from "./main.js";
-import { ReportError } from "./utility.js";
+import { ReportError } from "./commonUtility.js";
 
 
 
