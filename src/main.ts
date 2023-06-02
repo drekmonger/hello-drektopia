@@ -4,8 +4,6 @@ import {
   RedditAPIClient,
   UserContext,
   KeyValueStorage,
-  SubredditContextActionEvent,
-  ContextActionResponse,
 } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 
@@ -16,16 +14,12 @@ import {
 } from "./configurationSettings.js";
 
 import {
-  handleCounterInstall as counterInstallHandler,
+  rateLimitCounterInstall,
   resetHourlyCounter,
-  queryCounters,
-  resetCounters,
-  Counters,
+  usageReportHandler,
+  resetCountersHandler
 } from "./rateLimitCounter.js";
 
-import {
- usageReportHandler,
-} from "./taskHandlers.js"
 
 import { parseCommand, createCommandListMessage } from "./commands.js";
 import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
@@ -43,7 +37,7 @@ Devvit.addSettings(setupSettings());
 Devvit.addTrigger({
   event: Devvit.Trigger.AppInstall,
   handler: async (_, metadata) => {
-    counterInstallHandler(metadata);
+    rateLimitCounterInstall(metadata);
   },
 });
 
@@ -60,7 +54,7 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} Usage Report`,
   description: "Sends the user a private message reporting the current usage stats.",
-  handler: async (_, metadata) => usageReportHandler(_, metadata),
+  handler: async (_, metadata) => usageReportHandler(metadata),
 });
 
 //Usage reset -- moderator action
@@ -69,21 +63,10 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} Reset Usage Counter`,
   description: "Resets the daily and hourly counters to 0.",
-  handler: async (_, metadata) => {
-    try {
-      resetCounters(kv, metadata);
-
-      return {
-        success: true,
-        message: `${appName}: reset the hourly and daily usage counters to zero.`,
-      };
-    } catch (error) {
-      return ReportError(error);
-    }
-  },
+  handler: async (_, metadata) => resetCountersHandler(metadata),
 });
 
-//Block posting any comments for a post -- moderation action
+//Block posting comments on a post -- moderation action
 Devvit.addAction({
   context: Context.POST,
   userContext: UserContext.MODERATOR,
