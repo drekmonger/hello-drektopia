@@ -2,26 +2,26 @@ import { Context, Devvit, UserContext } from "@devvit/public-api";
 
 import { appName } from "./common.js";
 
-import { setupSettings } from "./configurationSettings.js";
+import { configurationSettings } from "./configurationSettings.js";
 
 import {
   rateLimitSetup,
   resetHourlyCounter,
   handleReportUsageAction,
-  handleRateLimitReset,
+  handleUsageResetAction,
 } from "./rateLimitCounter.js";
 
 import {
-  blockReplyingToPost,
+  blockReplyingAction,
   handleCreateAICommentAction,
-  handleCommentSubmit,
+  handleCommentSubmitTrigger,
 } from "./coreHandlers.js";
 
 import { handleRequestHelpAction } from "./userCommands.js";
 
 //App Setup
 Devvit.use(Devvit.Types.HTTP);
-Devvit.addSettings(setupSettings());
+Devvit.addSettings(configurationSettings);
 
 Devvit.addTrigger({
   event: Devvit.Trigger.AppInstall,
@@ -49,7 +49,7 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} Reset Usage Counter`,
   description: "Resets the daily and hourly counters to 0.",
-  handler: async (_, metadata) => handleRateLimitReset(metadata),
+  handler: async (_, metadata) => handleUsageResetAction(metadata),
 });
 
 //Block AI comments on a post -- moderator post action
@@ -59,7 +59,7 @@ Devvit.addAction({
   name: `${appName} Block AI comments here`,
   description:
     "Sets a flag that prevents the application from posting comments on a chosen post.",
-  handler: async (event, metadata) => blockReplyingToPost(event, metadata),
+  handler: async (event, metadata) => blockReplyingAction(event, metadata),
 });
 
 //Create an AI generated comment -- moderator comment action
@@ -84,7 +84,7 @@ Devvit.addAction({
 //When a new comment appears on sub, check for summerization, user commands, random chance -- comment trigger
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
-  handler: async (event, metadata) => handleCommentSubmit(event, metadata),
+  handler: async (event, metadata) => handleCommentSubmitTrigger(event, metadata),
 });
 
 //Summarize long posts -- post trigger TODO

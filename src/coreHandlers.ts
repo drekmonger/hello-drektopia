@@ -10,7 +10,7 @@ import { getValidatedSettings } from "./configurationSettings.js";
 import { generateAIResponse } from "./generateAIResponse.js";
 import { handleCommands } from "./userCommands.js";
 
-export async function blockReplyingToPost(
+export async function blockReplyingAction(
   event: PostContextActionEvent,
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
@@ -38,7 +38,7 @@ export async function blockReplyingToPost(
 
     return {
       success: true,
-      message: `${appName}: Will refuse to comment within this post.`,
+      message: `${appName} will refuse to comment within this post.`,
     };
   } catch (error) {
     return ReportError(error);
@@ -73,7 +73,7 @@ export async function handleCreateAICommentAction(
   }
 }
 
-export async function handleCommentSubmit(
+export async function handleCommentSubmitTrigger(
   event: CommentSubmit,
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {

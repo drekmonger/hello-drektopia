@@ -114,7 +114,7 @@ export async function handleReportUsageAction(
   }
 }
 
-export async function handleRateLimitReset(
+export async function handleUsageResetAction(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
   try {
