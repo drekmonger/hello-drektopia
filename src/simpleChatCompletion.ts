@@ -8,10 +8,16 @@ export interface ChatCompletionResponse {
 
 const MAX_TRIES = 2;
 
+/**
+ * A system prompt and a single user message walk into a bar. Nature takes its course, and an AI generated
+ * reply from OpenAI is returned, with just the output required for simple tasks.
+ * Simple chat completion for when all the fuss of a full chat engine isn't needed.
+ */
+
 export async function simpleChatCompletion({
   apiKey,
   model,
-  systemPrompt: systemText,
+  systemPrompt,
   userMessage,
   temperature,
 }: {
@@ -26,7 +32,7 @@ export async function simpleChatCompletion({
     model: model,
     temperature: temperature,
     messages: [
-      { role: "system", content: systemText },
+      { role: "system", content: systemPrompt },
       { role: "user", content: userMessage },
     ],
   });
@@ -89,6 +95,10 @@ export async function simpleChatCompletion({
   return { content: data["choices"][0]["message"]["content"] };
 }
 
+/**
+ * Send some text, get back a true/false flag for whether or not the text if naughty, according to OpenAI.
+ * Meant for simple use cases.
+ */
 export async function checkModeration({
   apiKey,
   userMessage,
