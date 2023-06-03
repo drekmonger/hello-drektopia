@@ -3,7 +3,9 @@ import { ContextActionResponse } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 
 import { appName, reddit } from "./main.js";
-import { ReportError } from "./commonUtility.js";
+import { ReportError, getPreviousThing } from "./commonUtility.js";
+import { AppSettings } from "./configurationSettings.js";
+import { generateAIResponse } from "./generateAIResponse.js";
 
 
 type UserCommand = {
@@ -69,7 +71,7 @@ export function composeHelpText(): string {
 }
 
 //Handlers
-export async function userCommandHelpMessage(
+export async function handleRequestHelpAction(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse>
 {
@@ -93,6 +95,58 @@ export async function userCommandHelpMessage(
     };
   } catch (error) {
     return ReportError(error);
+  }
+}
+
+export async function handleCommands(
+  body: string,
+  commentID: string,
+  metadata: Metadata | undefined,
+  settings: AppSettings
+): Promise<Boolean> {
+  let parsedCommand = parseCommand(body);
+
+  switch (parsedCommand.type) {
+    case "command":
+      console.log(
+        `Attempting reply with AI generated post to comment: ${commentID} in response to a !command.`
+      );
+
+      const thingToSend = await getPreviousThing(commentID, metadata);
+
+      await generateAIResponse({
+        replyTargetId: commentID,
+        thingToRead: thingToSend,
+        systemPrompt: parsedCommand.prompt,
+        formatResponse: parsedCommand.codeformat,
+        metadata,
+        settings,
+      });
+
+      console.log(
+        `Posted an AI generated reply to comment ${commentID} in response to a !command.`
+      );
+
+      //don't check for random chance of posting comment after a !command; we're done
+      return true;
+
+    case "help":
+      await reddit.submitComment(
+        { id: commentID, text: composeHelpText() },
+        metadata
+      );
+      console.log(
+        `Posted help message to comment ${commentID} in response to !help.`
+      );
+      return true;
+
+    case "invalid":
+      // Do absolutely nothing.
+      return true;
+
+    case "none":
+      // Do nothing, and allow the next check to occur
+      return false;
   }
 }
 
