@@ -84,7 +84,8 @@ Devvit.addAction({
 //When a new comment appears on sub, check for summerization, user commands, random chance -- comment trigger
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
-  handler: async (event, metadata) => handleCommentSubmitTrigger(event, metadata),
+  handler: async (event, metadata) =>
+    handleCommentSubmitTrigger(event, metadata),
 });
 
 //Summarize long posts -- post trigger TODO

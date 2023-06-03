@@ -21,6 +21,7 @@ export const configurationSettings: SettingsFormField[] = [
     name: "key",
     label: "API Key:",
   },
+  
   {
     type: "string",
     name: "model",
