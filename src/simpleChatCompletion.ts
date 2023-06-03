@@ -6,18 +6,18 @@ export interface ChatCompletionResponse {
   content?: string;
 }
 
-const MAX_RETRIES = 2;
+const MAX_TRIES = 2;
 
 export async function simpleChatCompletion({
   apiKey,
   model,
-  systemText,
+  systemPrompt: systemText,
   userMessage,
   temperature,
 }: {
   apiKey: string;
   model: string;
-  systemText: string;
+  systemPrompt: string;
   userMessage: string;
   temperature: number;
 }): Promise<ChatCompletionResponse> {
@@ -35,7 +35,7 @@ export async function simpleChatCompletion({
 
   let response;
 
-  for (let i = 0; i < MAX_RETRIES; i++) {
+  for (let i = 0; i < MAX_TRIES; i++) {
     try {
       let start = Date.now();
 
@@ -60,14 +60,14 @@ export async function simpleChatCompletion({
 
       // if this was the last attempt or error message is not timeout-related, throw error
       if (
-        i === MAX_RETRIES - 1 ||
+        i === MAX_TRIES - 1 ||
         !error.message.includes("context deadline exceeded")
       ) {
         throw new Error("Fetching failed: " + error);
       }
 
       // wait a wee bit before retrying
-      await new Promise((resolve) => setTimeout(resolve, 125));
+      await new Promise((resolve) => setTimeout(resolve, 133));
     }
   }
 
@@ -109,7 +109,7 @@ export async function checkModeration({
   });
 
   let response;
-  for (let i = 0; i < MAX_RETRIES; i++) {
+  for (let i = 0; i < MAX_TRIES; i++) {
     try {
       let start = Date.now();
       response = await fetch(apiUrl, {
@@ -133,7 +133,7 @@ export async function checkModeration({
 
       // if this was the last attempt or error message is not timeout-related, throw error
       if (
-        i === MAX_RETRIES - 1 ||
+        i === MAX_TRIES - 1 ||
         !error.message.includes("context deadline exceeded")
       ) {
         throw new Error("Fetching failed in checkModeration: " + error);

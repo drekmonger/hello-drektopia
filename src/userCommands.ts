@@ -6,9 +6,6 @@ import { appName, reddit } from "./main.js";
 import { ReportError } from "./commonUtility.js";
 
 
-
-
-
 type UserCommand = {
   prompt: string;
   description: string;
@@ -53,7 +50,7 @@ export function parseCommand(body: string): ParsedCommandResult {
   }
 }
 
-export function createCommandListMessage(): string {
+export function composeHelpText(): string {
   // Start with a friendly, casual intro message
   let message =
     "Hey. Here's a list of commands you can use in this subbreddit. Simply type '!' before the command name (case doesn't matter). Have fun!\n\n";
@@ -72,19 +69,19 @@ export function createCommandListMessage(): string {
 }
 
 //Handlers
-export async function sendUserCommandHelpMessage(
+export async function userCommandHelpMessage(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse>
 {
   try {
     const currentUser = await reddit.getCurrentUser(metadata);
 
-    const messageBody = createCommandListMessage();
+    const messageBody = composeHelpText();
 
     await reddit.sendPrivateMessage(
       {
         to: currentUser.username,
-        subject: "Usage Stats",
+        subject: "Command you can try!",
         text: messageBody,
       },
       metadata

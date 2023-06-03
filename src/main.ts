@@ -21,11 +21,9 @@ import {
   resetCountersHandler as resetCounters,
 } from "./rateLimitCounter.js";
 
-import { blockAICommentsHandler as blockAICommentsOnPost, createCommentHandler as createAIComment } from "./AICommentHandlers.js"
-
-
-import { sendUserCommandHelpMessage, parseCommand, createCommandListMessage } from "./userCommands.js";
-import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
+import { blockReplyingToPost, createAIComment } from "./coreHandlers.js"
+import { userCommandHelpMessage, parseCommand, composeHelpText } from "./userCommands.js";
+import {  generateAIResponse } from "./generateAIResponse.js";
 
 
 import { getPreviousThing, chanceTrue, ReportError } from "./commonUtility.js";
@@ -75,7 +73,7 @@ Devvit.addAction({
   name: `${appName} Block AI comments here`,
   description:
     "Sets a flag that prevents the application from posting comments on a chosen post.",
-  handler: async (event, metadata) => blockAICommentsOnPost(event, metadata)
+  handler: async (event, metadata) => blockReplyingToPost(event, metadata)
 });
 
 //Create an AI generated comment -- moderator comment action
@@ -93,7 +91,7 @@ Devvit.addAction({
   userContext: UserContext.MEMBER,
   name: `${appName} Get a list of commands`,
   description: "Mssages the user with a list of commands",
-  handler: async (_, metadata) => sendUserCommandHelpMessage(metadata),
+  handler: async (_, metadata) => userCommandHelpMessage(metadata),
 });
 
 
@@ -146,8 +144,8 @@ Devvit.addTrigger({
 
       const comment = await reddit.getCommentById(commentID, metadata);
 
-      await replyWithAIGeneratedComment({
-        commentID,
+      await generateAIResponse({
+        replyTargetId: commentID,
         thingToRead: comment,
         systemPrompt: settings.prompt,
         formatResponse: false,
@@ -181,8 +179,8 @@ async function handleCommands(
 
       const thingToSend = await getPreviousThing(commentID, metadata);
 
-      await replyWithAIGeneratedComment({
-        commentID,
+      await generateAIResponse({
+        replyTargetId: commentID,
         thingToRead: thingToSend,
         systemPrompt: parsedCommand.prompt,
         formatResponse: parsedCommand.codeformat,
@@ -199,7 +197,7 @@ async function handleCommands(
 
     case "help":
       await reddit.submitComment(
-        { id: commentID, text: createCommandListMessage() },
+        { id: commentID, text: composeHelpText() },
         metadata
       );
       console.log(

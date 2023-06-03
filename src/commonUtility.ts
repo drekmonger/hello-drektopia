@@ -1,6 +1,13 @@
 import { Metadata } from "@devvit/protos";
-import { RedditContent } from "./RedditContentType.js";
+import { Comment, Post } from "@devvit/public-api";
 import { reddit, appName } from "./main.js";
+
+//Utility Types
+export type RedditContent = Comment | Post;
+export function isComment(obj: RedditContent): obj is Comment {
+  return (obj as Comment).postId !== undefined;
+}
+
 
 //Utility functions
 export function chanceTrue(percentage: number): boolean {

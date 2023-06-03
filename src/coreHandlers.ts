@@ -7,9 +7,9 @@ import { Metadata } from "@devvit/protos";
 import { ReportError } from "./commonUtility.js";
 import { appName, kv, reddit } from "./main.js";
 import { getValidatedSettings } from "./configurationSettings.js";
-import { replyWithAIGeneratedComment } from "./replyWithAIGeneratedComment.js";
+import { generateAIResponse } from "./generateAIResponse.js";
 
-export async function blockAICommentsHandler(
+export async function blockReplyingToPost(
   event: PostContextActionEvent,
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
@@ -44,7 +44,7 @@ export async function blockAICommentsHandler(
   }
 }
 
-export async function createCommentHandler(
+export async function createAIComment(
     event: CommentContextActionEvent,
     metadata: Metadata | undefined
   ): Promise<ContextActionResponse> {
@@ -56,8 +56,8 @@ export async function createCommentHandler(
     
           const comment = await reddit.getCommentById(commentID, metadata);
     
-          await replyWithAIGeneratedComment({
-            commentID,
+          await generateAIResponse({
+            replyTargetId: commentID,
             thingToRead: comment,
             systemPrompt: settings.prompt,
             formatResponse: false,
