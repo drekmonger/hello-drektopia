@@ -5,10 +5,10 @@ import {
   ChatCompletionResponse,
 } from "./simpleChatCompletion.js";
 
+import { reddit, kv, appName , RedditContent, isComment } from "./common.js";
 import { AppSettings } from "./configurationSettings.js";
 import { incrementCounters as incrementRateLimitCounter, isAboveRateLimit } from "./rateLimitCounter.js";
-import { reddit, kv, appName } from "./main.js";
-import { RedditContent, isComment } from "./commonUtility.js";
+
 
 export async function generateAIResponse(args: {
   replyTargetId: string;
@@ -51,7 +51,7 @@ export async function generateAIResponse(args: {
 
   await submitComment(replyTargetId, ChatGPTResponse.content!, metadata);
 
-  await incrementRateLimitCounter(kv, metadata);
+  await incrementRateLimitCounter(metadata);
 }
 
 function prepareBodyText(body: string | undefined): string {
@@ -135,7 +135,7 @@ async function checkRestrictions(
   }
 
   //check if rate limit exceeded
-  if (await isAboveRateLimit(kv, settings.maxday, settings.maxhour, metadata)) {
+  if (await isAboveRateLimit(settings.maxday, settings.maxhour, metadata)) {
     return "OpenAI API call limit exceeded.";
   }
 

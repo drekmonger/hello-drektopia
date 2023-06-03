@@ -1,6 +1,12 @@
 import { Metadata } from "@devvit/protos";
-import { Comment, Post } from "@devvit/public-api";
-import { reddit, appName } from "./main.js";
+import { Comment, KeyValueStorage, Post, RedditAPIClient } from "@devvit/public-api";
+
+
+//Singletons
+export const appName: string = "Hello-drektopia";
+export const reddit = new RedditAPIClient();
+export const kv = new KeyValueStorage();
+
 
 //Utility Types
 export type RedditContent = Comment | Post;

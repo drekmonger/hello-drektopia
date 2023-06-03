@@ -1,12 +1,9 @@
 import { ContextActionResponse } from "@devvit/public-api";
-
 import { Metadata } from "@devvit/protos";
 
-import { appName, reddit } from "./main.js";
-import { ReportError, getPreviousThing } from "./commonUtility.js";
+import { appName, reddit, ReportError, getPreviousThing } from "./common.js";
 import { AppSettings } from "./configurationSettings.js";
 import { generateAIResponse } from "./generateAIResponse.js";
-
 
 type UserCommand = {
   prompt: string;
@@ -73,8 +70,7 @@ export function composeHelpText(): string {
 //Handlers
 export async function handleRequestHelpAction(
   metadata: Metadata | undefined
-): Promise<ContextActionResponse>
-{
+): Promise<ContextActionResponse> {
   try {
     const currentUser = await reddit.getCurrentUser(metadata);
 
@@ -149,9 +145,6 @@ export async function handleCommands(
       return false;
   }
 }
-
-
-
 
 //The user commands.  TODO: Figure out a good way to make these defaults edittable in settings
 const commandCommonBoilerplate =

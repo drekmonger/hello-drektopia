@@ -1,8 +1,8 @@
 import { ContextActionResponse, Devvit, KeyValueStorage } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
-import { appName, kv, reddit } from "./main.js";
+
 import { getValidatedSettings } from "./configurationSettings.js";
-import { ReportError } from "./commonUtility.js";
+import {appName, kv, reddit, ReportError } from "./common.js";
 
 const scheduler = Devvit.use(Devvit.Types.Scheduler);
 
@@ -10,7 +10,14 @@ const HOUR_KEY = "hourly_count";
 const DAY_KEY = "daily_count";
 const LIFE_KEY = "lifetime_count";
 
-export async function rateLimitCounterInstall(metadata?: Metadata) {
+
+export type Counters = [
+  hourCount: number,
+  dailyCount: number,
+  lifetimeCount: number
+];
+
+export async function rateLimitSetup(metadata?: Metadata) {
   try {
     // schedule reset counter every hour
     await scheduler.Schedule(
@@ -24,7 +31,6 @@ export async function rateLimitCounterInstall(metadata?: Metadata) {
 }
 
 export async function resetHourlyCounter(
-  kv: KeyValueStorage,
   metadata?: Metadata
 ) {
   await kv.put(HOUR_KEY, 0, metadata);
@@ -37,20 +43,7 @@ export async function resetHourlyCounter(
   }
 }
 
-// Reset the hourly, daily counters
-export async function resetCounters(kv: KeyValueStorage, metadata?: Metadata) {
-  await kv.put(HOUR_KEY, 0, metadata);
-  await kv.put(DAY_KEY, 0, metadata);
-}
-
-export type Counters = [
-  hourCount: number,
-  dailyCount: number,
-  lifetimeCount: number
-];
-
 export async function queryCounters(
-  kv: KeyValueStorage,
   metadata?: Metadata
 ): Promise<Counters> {
   const hourlyCount = Number((await kv.get(HOUR_KEY, metadata)) || 0);
@@ -61,7 +54,6 @@ export async function queryCounters(
 }
 
 export async function isAboveRateLimit(
-  kv: KeyValueStorage,
   maxDaily: number,
   maxHourly: number,
   metadata?: Metadata
@@ -73,7 +65,6 @@ export async function isAboveRateLimit(
 }
 
 export async function incrementCounters(
-  kv: KeyValueStorage,
   metadata?: Metadata
 ) {
   const hourlyCount = Number((await kv.get(HOUR_KEY, metadata)) || 0);
@@ -91,7 +82,7 @@ export async function incrementCounters(
 }
 
 //Action handlers
-export async function usageReportHandler(
+export async function handleReportUsageAction(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
   try {
@@ -99,7 +90,7 @@ export async function usageReportHandler(
 
     const currentUser = await reddit.getCurrentUser(metadata);
 
-    const counters = (await queryCounters(kv, metadata)) as Counters;
+    const counters = (await queryCounters(metadata)) as Counters;
 
     const messageBody = `**Requested usage report from ${appName}:**
   
@@ -123,11 +114,12 @@ export async function usageReportHandler(
   }
 }
 
-export async function resetCountersHandler(
+export async function handleRateLimitReset(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
   try {
-    resetCounters(kv, metadata);
+    await kv.put(HOUR_KEY, 0, metadata);
+    await kv.put(DAY_KEY, 0, metadata);
 
     return {
       success: true,

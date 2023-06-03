@@ -1,51 +1,36 @@
-import {
-  Context,
-  Devvit,
-  RedditAPIClient,
-  UserContext,
-  KeyValueStorage,
-} from "@devvit/public-api";
+import { Context, Devvit, UserContext } from "@devvit/public-api";
 
-import { Metadata } from "@devvit/protos";
+import { appName } from "./common.js";
+
+import { setupSettings } from "./configurationSettings.js";
 
 import {
-  AppSettings,
-  setupSettings,
-  getValidatedSettings,
-} from "./configurationSettings.js";
-
-import {
-  rateLimitCounterInstall as installRateLimitCounter,
+  rateLimitSetup,
   resetHourlyCounter,
-  usageReportHandler as usageReport,
-  resetCountersHandler as resetCounters,
+  handleReportUsageAction,
+  handleRateLimitReset,
 } from "./rateLimitCounter.js";
 
-import { blockReplyingToPost, handleCreateAICommentAction, handleCommentSubmit } from "./coreHandlers.js";
 import {
-  handleRequestHelpAction,
-} from "./userCommands.js";
-import { generateAIResponse } from "./generateAIResponse.js";
+  blockReplyingToPost,
+  handleCreateAICommentAction,
+  handleCommentSubmit,
+} from "./coreHandlers.js";
 
-import { getPreviousThing, chanceTrue, ReportError } from "./commonUtility.js";
-
-export const appName: string = "Hello-drektopia";
+import { handleRequestHelpAction } from "./userCommands.js";
 
 //App Setup
 Devvit.use(Devvit.Types.HTTP);
-export const reddit = new RedditAPIClient();
-export const kv = new KeyValueStorage();
-
 Devvit.addSettings(setupSettings());
 
 Devvit.addTrigger({
   event: Devvit.Trigger.AppInstall,
-  handler: async (_, metadata) => installRateLimitCounter(metadata),
+  handler: async (_, metadata) => rateLimitSetup(metadata),
 });
 
 Devvit.addSchedulerHandler({
   type: "reset_hourly_counter",
-  handler: async (_, metadata) => resetHourlyCounter(kv, metadata),
+  handler: async (_, metadata) => resetHourlyCounter(metadata),
 });
 
 //Usage report -- moderation subreddit action
@@ -55,7 +40,7 @@ Devvit.addAction({
   name: `${appName} Usage Report`,
   description:
     "Sends the user a private message reporting the current usage stats.",
-  handler: async (_, metadata) => usageReport(metadata),
+  handler: async (_, metadata) => handleReportUsageAction(metadata),
 });
 
 //Usage reset -- moderator subreddit action
@@ -64,7 +49,7 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} Reset Usage Counter`,
   description: "Resets the daily and hourly counters to 0.",
-  handler: async (_, metadata) => resetCounters(metadata),
+  handler: async (_, metadata) => handleRateLimitReset(metadata),
 });
 
 //Block AI comments on a post -- moderator post action
@@ -83,7 +68,8 @@ Devvit.addAction({
   userContext: UserContext.MODERATOR,
   name: `${appName} AI Reply`,
   description: "Reply to comment with an AI generated message",
-  handler: async (event, metadata) => handleCreateAICommentAction(event, metadata),
+  handler: async (event, metadata) =>
+    handleCreateAICommentAction(event, metadata),
 });
 
 //Send user command list via private message -- user subreddit action
@@ -98,13 +84,9 @@ Devvit.addAction({
 //When a new comment appears on sub, check for summerization, user commands, random chance -- comment trigger
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
-  handler: async (event, metadata) => handleCommentSubmit(event, metadata)
+  handler: async (event, metadata) => handleCommentSubmit(event, metadata),
 });
 
 //Summarize long posts -- post trigger TODO
-
-
-
-//
 
 export default Devvit;

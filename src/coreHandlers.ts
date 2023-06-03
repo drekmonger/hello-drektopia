@@ -5,8 +5,7 @@ import {
 } from "@devvit/public-api";
 import { Metadata, CommentSubmit } from "@devvit/protos";
 
-import { ReportError, chanceTrue } from "./commonUtility.js";
-import { appName, kv, reddit } from "./main.js";
+import {appName, kv, reddit, ReportError, chanceTrue } from "./common.js";
 import { getValidatedSettings } from "./configurationSettings.js";
 import { generateAIResponse } from "./generateAIResponse.js";
 import { handleCommands } from "./userCommands.js";
