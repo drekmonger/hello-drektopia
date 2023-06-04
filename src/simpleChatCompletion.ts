@@ -9,8 +9,6 @@ export interface ChatCompletionResponse {
 const MAX_TRIES = 2;
 
 /**
- * A system prompt and a single user message walk into a bar. Nature takes its course, and an AI generated
- * reply from OpenAI is returned, with just the output required for simple tasks.
  * Simple chat completion for when all the fuss of a full chat engine isn't needed.
  */
 

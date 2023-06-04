@@ -133,9 +133,9 @@ export interface AppSettings {
   maxhour: number;
   maxday: number;
   maxcharacters: number;
-  enablesummarizationforposts: number;
-  enablesummarizationforcomments: number;
-  summarizationthreshold: boolean;
+  enablesummarizationforposts: boolean;
+  enablesummarizationforcomments: boolean;
+  summarizationthreshold: number;
   enablecommands: boolean;
   chanceof: number;
 }

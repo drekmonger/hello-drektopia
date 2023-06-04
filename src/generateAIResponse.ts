@@ -15,6 +15,7 @@ export async function generateAIResponse(args: {
   thingToRead: RedditContent;
   systemPrompt: string;
   formatResponse: boolean;
+  
   settings: AppSettings;
   metadata: Metadata | undefined;
   

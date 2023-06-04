@@ -1,4 +1,4 @@
-import { ContextActionResponse, Devvit, KeyValueStorage } from "@devvit/public-api";
+import { ContextActionResponse, Devvit } from "@devvit/public-api";
 import { Metadata } from "@devvit/protos";
 
 import { getValidatedSettings } from "./configurationSettings.js";

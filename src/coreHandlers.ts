@@ -80,6 +80,9 @@ export async function handleCommentSubmitTrigger(
   try {
     const appUser = await reddit.getAppUser(metadata);
     const commentID = event.comment?.id as string;
+    const comment = await reddit.getCommentById(commentID, metadata);
+ 
+
 
     //if the author is the app, bail out
     if (event.author?.id === appUser.id) {
@@ -90,10 +93,11 @@ export async function handleCommentSubmitTrigger(
 
     const settings = await getValidatedSettings(metadata);
 
+
     //check if there were any !commands in the comment
     if (settings.enablecommands) {
       const commandExecuted = await handleCommands(
-        event.comment?.body!,
+        comment.body,
         commentID,
         metadata,
         settings
@@ -105,14 +109,20 @@ export async function handleCommentSubmitTrigger(
       }
     }
 
-    //check for random chance of posting comment
-    if (!chanceTrue(settings.chanceof)) {
-      const message = `Ignoring comment: ${commentID} due to random chance of ${settings.chanceof}%.`;
-      console.log(message);
-      return { success: true, message: message };
+    //check if comment should be summerized
+    if (settings.enablesummarizationforcomments && event.comment!.body.length >= settings.summarizationthreshold) {
+      await generateAIResponse({
+        replyTargetId: commentID,
+        thingToRead: comment,
+        systemPrompt: summerizationPrompt,
+        formatResponse: false,
+        metadata,
+        settings,
+      });
     }
 
-    const comment = await reddit.getCommentById(commentID, metadata);
+    //check for random chance of submitting comment
+    if (chanceTrue(settings.chanceof)) {
 
     await generateAIResponse({
       replyTargetId: commentID,
@@ -124,10 +134,21 @@ export async function handleCommentSubmitTrigger(
     });
 
     const message = `Posted an AI generated reply to comment: ${commentID}.`;
-    console.log();
+    console.log(message);
     return { success: true, message: message };
+    }
+
+
+
+    //no action taken
+    const message = `No action taken on comment: ${commentID}.`;
+    console.log(message);
+    return {success: true, message: message}
+    
 
   } catch (error) {
     return ReportError(error);
   }
 }
+
+const summerizationPrompt = "You will be prompted with a comment from reddit. Summerize this comment as best you can down to a single paragraph."
