@@ -15,7 +15,8 @@ export async function generateAIResponse(args: {
   thingToRead: RedditContent;
   systemPrompt: string;
   formatResponse: boolean;
-  
+  responsePrefix: string;
+  responseSuffix: string;
   settings: AppSettings;
   metadata: Metadata | undefined;
   
@@ -25,6 +26,8 @@ export async function generateAIResponse(args: {
     thingToRead,
     systemPrompt,
     formatResponse,
+    responsePrefix,
+    responseSuffix,
     settings,
     metadata,
   } = args;
@@ -50,7 +53,9 @@ export async function generateAIResponse(args: {
     ChatGPTResponse.content = formatForCodeBlock(ChatGPTResponse.content!);
   }
 
-  await submitComment(replyTargetId, ChatGPTResponse.content!, metadata);
+  const bodyToSend = responsePrefix + ChatGPTResponse.content! + responseSuffix
+
+  await submitComment(replyTargetId, bodyToSend, metadata);
 
   await incrementRateLimitCounter(metadata);
 }

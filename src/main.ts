@@ -13,8 +13,9 @@ import {
 
 import {
   blockReplyingAction,
-  handleCreateAICommentAction,
-  handleCommentSubmitTrigger,
+  handleSubmitAICommentAction,
+  handleCommentSubmit,
+  handlePostSubmit,
 } from "./coreHandlers.js";
 
 import { handleRequestHelpAction } from "./userCommands.js";
@@ -69,7 +70,7 @@ Devvit.addAction({
   name: `${appName} AI Reply`,
   description: "Reply to comment with an AI generated message",
   handler: async (event, metadata) =>
-    handleCreateAICommentAction(event, metadata),
+    handleSubmitAICommentAction(event, metadata),
 });
 
 //Send user command list via private message -- user subreddit action
@@ -77,7 +78,7 @@ Devvit.addAction({
   context: Context.SUBREDDIT,
   userContext: UserContext.MEMBER,
   name: `${appName} Get a list of commands`,
-  description: "Mssages the user with a list of commands",
+  description: "Messages the user with a list of commands",
   handler: async (_, metadata) => handleRequestHelpAction(metadata),
 });
 
@@ -85,9 +86,14 @@ Devvit.addAction({
 Devvit.addTrigger({
   event: Devvit.Trigger.CommentSubmit,
   handler: async (event, metadata) =>
-    handleCommentSubmitTrigger(event, metadata),
+    handleCommentSubmit(event, metadata),
 });
 
-//Summarize long posts -- post trigger TODO
+//Summarize long posts -- post trigger
+Devvit.addTrigger({
+  event: Devvit.Trigger.PostSubmit,
+  handler: async (event, metadata) =>
+    handlePostSubmit(event, metadata),
+})
 
 export default Devvit;

@@ -3,9 +3,9 @@ import {
   PostContextActionEvent,
   CommentContextActionEvent,
 } from "@devvit/public-api";
-import { Metadata, CommentSubmit } from "@devvit/protos";
+import { Metadata, CommentSubmit, PostSubmit } from "@devvit/protos";
 
-import {appName, kv, reddit, ReportError, chanceTrue } from "./common.js";
+import { appName, kv, reddit, ReportError, chanceTrue } from "./common.js";
 import { getValidatedSettings } from "./configurationSettings.js";
 import { generateAIResponse } from "./generateAIResponse.js";
 import { handleCommands } from "./userCommands.js";
@@ -45,7 +45,7 @@ export async function blockReplyingAction(
   }
 }
 
-export async function handleCreateAICommentAction(
+export async function handleSubmitAICommentAction(
   event: CommentContextActionEvent,
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
@@ -61,6 +61,8 @@ export async function handleCreateAICommentAction(
       thingToRead: comment,
       systemPrompt: settings.prompt,
       formatResponse: false,
+      responsePrefix: "",
+      responseSuffix: "",
       metadata,
       settings,
     });
@@ -73,7 +75,7 @@ export async function handleCreateAICommentAction(
   }
 }
 
-export async function handleCommentSubmitTrigger(
+export async function handleCommentSubmit(
   event: CommentSubmit,
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
@@ -81,8 +83,6 @@ export async function handleCommentSubmitTrigger(
     const appUser = await reddit.getAppUser(metadata);
     const commentID = event.comment?.id as string;
     const comment = await reddit.getCommentById(commentID, metadata);
- 
-
 
     //if the author is the app, bail out
     if (event.author?.id === appUser.id) {
@@ -92,7 +92,6 @@ export async function handleCommentSubmitTrigger(
     }
 
     const settings = await getValidatedSettings(metadata);
-
 
     //check if there were any !commands in the comment
     if (settings.enablecommands) {
@@ -104,18 +103,23 @@ export async function handleCommentSubmitTrigger(
       );
       if (commandExecuted) {
         const message = `Handled user command in ${commentID}.`;
-        console.log(message)
+        console.log(message);
         return { success: true, message: message };
       }
     }
 
     //check if comment should be summerized
-    if (settings.enablesummarizationforcomments && event.comment!.body.length >= settings.summarizationthreshold) {
+    if (
+      settings.enablesummarizationforcomments &&
+      event.comment!.body.length >= settings.summarizationthreshold
+    ) {
       await generateAIResponse({
         replyTargetId: commentID,
         thingToRead: comment,
         systemPrompt: summerizationPrompt,
         formatResponse: false,
+        responsePrefix: "Summary: \n",
+        responseSuffix: "",
         metadata,
         settings,
       });
@@ -123,32 +127,76 @@ export async function handleCommentSubmitTrigger(
 
     //check for random chance of submitting comment
     if (chanceTrue(settings.chanceof)) {
+      await generateAIResponse({
+        replyTargetId: commentID,
+        thingToRead: comment,
+        systemPrompt: settings.prompt,
+        formatResponse: false,
+        responsePrefix: "Summary: \n",
+        responseSuffix: "",
+        metadata,
+        settings,
+      });
 
-    await generateAIResponse({
-      replyTargetId: commentID,
-      thingToRead: comment,
-      systemPrompt: settings.prompt,
-      formatResponse: false,
-      metadata,
-      settings,
-    });
-
-    const message = `Posted an AI generated reply to comment: ${commentID}.`;
-    console.log(message);
-    return { success: true, message: message };
+      const message = `Posted an AI generated reply to comment: ${commentID}.`;
+      console.log(message);
+      return { success: true, message: message };
     }
-
-
 
     //no action taken
     const message = `No action taken on comment: ${commentID}.`;
     console.log(message);
-    return {success: true, message: message}
-    
-
+    return { success: true, message: message };
   } catch (error) {
     return ReportError(error);
   }
 }
 
-const summerizationPrompt = "You will be prompted with a comment from reddit. Summerize this comment as best you can down to a single paragraph."
+export async function handlePostSubmit(
+  event: PostSubmit,
+  metadata: Metadata | undefined
+): Promise<ContextActionResponse> {
+  try {
+    //check if post has a body
+    if (event.post?.selftext == undefined || event.post?.selftext === "") {
+      return {
+        success: true,
+        message: `Post ${event.post!.id} has no body to consider.`,
+      };
+    }
+
+    const body = event.post!.selftext;
+    const post = await reddit.getPostById(event.post!.id, metadata); //generateAIReponse expects postV1 right now
+
+    const settings = await getValidatedSettings(metadata);
+
+    console.log("Considering post body with length:" + body.length) //TODO remove this debug console.log
+
+    //check if post should be summerized
+    if (
+      settings.enablesummarizationforpost &&
+      body.length >= settings.summarizationthreshold
+    ) {
+      await generateAIResponse({
+        replyTargetId: event.post!.id,
+        thingToRead: post,
+        systemPrompt: summerizationPrompt,
+        formatResponse: false,
+        responsePrefix: "**Summary:** \n \n >",
+        responseSuffix: "",
+        metadata,
+        settings,
+      });
+    }
+
+    //no action taken
+    const message = `No action taken on post: ${event.post!.id}.`;
+    console.log(message);
+    return { success: true, message: message };
+  } catch (error) {
+    return ReportError(error);
+  }
+}
+
+const summerizationPrompt =
+  "You will be prompted some text. Summerize this text as best you can down to a single paragraph.";

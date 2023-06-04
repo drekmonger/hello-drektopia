@@ -115,6 +115,8 @@ export async function handleCommands(
         thingToRead: thingToSend,
         systemPrompt: parsedCommand.prompt,
         formatResponse: parsedCommand.codeformat,
+        responsePrefix: "",
+        responseSuffix: "",
         metadata,
         settings,
       });
