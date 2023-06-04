@@ -11,7 +11,7 @@ const DAY_KEY = "daily_count";
 const LIFE_KEY = "lifetime_count";
 
 
-export type Counters = [
+export type UsageCounters = [
   hourCount: number,
   dailyCount: number,
   lifetimeCount: number
@@ -45,7 +45,8 @@ export async function resetHourlyCounter(
 
 export async function queryCounters(
   metadata?: Metadata
-): Promise<Counters> {
+): Promise<UsageCounters> {
+
   const hourlyCount = Number((await kv.get(HOUR_KEY, metadata)) || 0);
   const dailyCount = Number((await kv.get(DAY_KEY, metadata)) || 0);
   const lifetimeCount = Number((await kv.get(LIFE_KEY, metadata)) || 0);
@@ -90,7 +91,7 @@ export async function handleReportUsageAction(
 
     const currentUser = await reddit.getCurrentUser(metadata);
 
-    const counters = (await queryCounters(metadata)) as Counters;
+    const counters = (await queryCounters(metadata)) as UsageCounters;
 
     const messageBody = `**Requested usage report from ${appName}:**
   
