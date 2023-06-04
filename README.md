@@ -3,7 +3,7 @@
 ## Overview
 
 
-This application is meant to add a bit of fun and functionality to any subreddit it's installed on. It can generate AI created content via OpenAI's ChatCompletion endpoint, with a set of safety measures. At time of writing, you can test the application on the sub /r/Drektopia.
+This application is meant to add a bit of fun and functionality to a subreddit it is installed on. It can generate AI created content via OpenAI's ChatCompletion endpoint, with a set of safety measures. At time of writing, you can test the application on the sub /r/Drektopia.
 
 
 ## Key Features
