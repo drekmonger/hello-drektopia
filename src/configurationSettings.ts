@@ -161,7 +161,7 @@ export function isAppSettings(obj: any): obj is AppSettings {
 */
 }
 
-export async function getValidatedSettings(metadata: Metadata | undefined) {
+export async function getValidatedSettings(metadata: Metadata | undefined) : Promise<AppSettings> {
   const settings = await getSettings(metadata);
 
   if (!isAppSettings(settings)) {

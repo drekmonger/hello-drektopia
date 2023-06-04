@@ -108,7 +108,7 @@ export async function handleCommentSubmit(
       }
     }
 
-    //check if comment should be summerized
+    //check if comment should be summarized
     if (
       settings.enablesummarizationforcomments &&
       event.comment!.body.length >= settings.summarizationthreshold
@@ -123,6 +123,9 @@ export async function handleCommentSubmit(
         metadata,
         settings,
       });
+      const message = `Summarized ${commentID}.`;
+        console.log(message);
+        return { success: true, message: message };
     }
 
     //check for random chance of submitting comment
@@ -170,11 +173,9 @@ export async function handlePostSubmit(
 
     const settings = await getValidatedSettings(metadata);
 
-    console.log("Considering post body with length:" + body.length) //TODO remove this debug console.log
-
     //check if post should be summerized
     if (
-      settings.enablesummarizationforpost &&
+      settings.enablesummarizationforposts &&
       body.length >= settings.summarizationthreshold
     ) {
       await generateAIResponse({
@@ -199,4 +200,4 @@ export async function handlePostSubmit(
 }
 
 const summerizationPrompt =
-  "You will be prompted some text. Summerize this text as best you can down to a single paragraph.";
+  "You will be prompted with a body of text. Summerize this text as best you can down to a single paragraph.";
