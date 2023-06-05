@@ -7,7 +7,6 @@ import {
   generateAIResponse,
   formatNOP,
   formatForCodeBlock,
-  formatForSummary,
 } from "./generateAIResponse.js";
 import { specialCommands, SpecialCommandFunc } from "./commandsSpecial.js";
 import { commands } from "./commandsUser.js";

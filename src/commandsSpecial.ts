@@ -1,6 +1,6 @@
 import { Metadata } from "@devvit/protos";
 import { helpText } from "./commands.js";
-import { getPreviousThing, reddit, ReportError } from "./common.js";
+import { getPreviousThing, reddit} from "./common.js";
 import { formatNOP, generateAIResponse } from "./generateAIResponse.js";
 import { AppSettings } from "./configurationSettings.js";
 import { ContextActionResponse } from "@devvit/public-api";
