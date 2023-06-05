@@ -3,7 +3,7 @@ import { Metadata } from "@devvit/protos";
 
 import { appName, reddit, ReportError, getPreviousThing } from "./common.js";
 import { AppSettings } from "./configurationSettings.js";
-import { generateAIResponse } from "./generateAIResponse.js";
+import { generateAIResponse, formatNOP, formatForCodeBlock } from "./generateAIResponse.js";
 
 type UserCommand = {
   prompt: string;
@@ -114,9 +114,7 @@ export async function handleCommands(
         replyTargetId: commentID,
         thingToRead: thingToSend,
         systemPrompt: parsedCommand.prompt,
-        formatResponse: parsedCommand.codeformat,
-        responsePrefix: "",
-        responseSuffix: "",
+        formatFunction: parsedCommand.codeformat ? formatForCodeBlock : formatNOP,
         metadata,
         settings,
       });

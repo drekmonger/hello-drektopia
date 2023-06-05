@@ -7,7 +7,7 @@ import { Metadata, CommentSubmit, PostSubmit } from "@devvit/protos";
 
 import { appName, kv, reddit, ReportError, chanceTrue } from "./common.js";
 import { getValidatedSettings } from "./configurationSettings.js";
-import { generateAIResponse } from "./generateAIResponse.js";
+import { generateAIResponse, formatNOP, formatForSummary } from "./generateAIResponse.js";
 import { handleCommands } from "./userCommands.js";
 
 export async function blockReplyingAction(
@@ -60,9 +60,7 @@ export async function handleSubmitAICommentAction(
       replyTargetId: commentID,
       thingToRead: comment,
       systemPrompt: settings.prompt,
-      formatResponse: false,
-      responsePrefix: "",
-      responseSuffix: "",
+      formatFunction: formatNOP,
       metadata,
       settings,
     });
@@ -117,9 +115,7 @@ export async function handleCommentSubmit(
         replyTargetId: commentID,
         thingToRead: comment,
         systemPrompt: summerizationPrompt,
-        formatResponse: false,
-        responsePrefix: "Summary: \n",
-        responseSuffix: "",
+        formatFunction: formatForSummary,
         metadata,
         settings,
       });
@@ -134,9 +130,7 @@ export async function handleCommentSubmit(
         replyTargetId: commentID,
         thingToRead: comment,
         systemPrompt: settings.prompt,
-        formatResponse: false,
-        responsePrefix: "Summary: \n",
-        responseSuffix: "",
+        formatFunction: formatNOP,
         metadata,
         settings,
       });
@@ -182,9 +176,7 @@ export async function handlePostSubmit(
         replyTargetId: event.post!.id,
         thingToRead: post,
         systemPrompt: summerizationPrompt,
-        formatResponse: false,
-        responsePrefix: "**Summary:** \n \n >",
-        responseSuffix: "",
+        formatFunction: formatForSummary,
         metadata,
         settings,
       });

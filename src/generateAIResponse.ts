@@ -5,29 +5,26 @@ import {
   ChatCompletionResponse,
 } from "./simpleChatCompletion.js";
 
-import { reddit, kv, appName , RedditContent, isComment } from "./common.js";
+import { reddit, kv, appName, RedditContent, isComment } from "./common.js";
 import { AppSettings } from "./configurationSettings.js";
-import { incrementCounters as incrementRateLimitCounter, isAboveRateLimit } from "./rateLimitCounter.js";
-
+import {
+  incrementCounters as incrementRateLimitCounter,
+  isAboveRateLimit,
+} from "./rateLimitCounter.js";
 
 export async function generateAIResponse(args: {
   replyTargetId: string;
   thingToRead: RedditContent;
   systemPrompt: string;
-  formatResponse: boolean;
-  responsePrefix: string;
-  responseSuffix: string;
+  formatFunction: FormatFunc;
   settings: AppSettings;
   metadata: Metadata | undefined;
-  
 }) {
   const {
     replyTargetId,
     thingToRead,
     systemPrompt,
-    formatResponse,
-    responsePrefix,
-    responseSuffix,
+    formatFunction,
     settings,
     metadata,
   } = args;
@@ -49,13 +46,9 @@ export async function generateAIResponse(args: {
 
   validateChatGPTResponse(ChatGPTResponse);
 
-  if (formatResponse) {
-    ChatGPTResponse.content = formatForCodeBlock(ChatGPTResponse.content!);
-  }
+  const bodyToSubmit = formatFunction(ChatGPTResponse.content!);
 
-  const bodyToSend = responsePrefix + ChatGPTResponse.content! + responseSuffix
-
-  await submitComment(replyTargetId, bodyToSend, metadata);
+  await submitComment(replyTargetId, bodyToSubmit, metadata);
 
   await incrementRateLimitCounter(metadata);
 }
@@ -164,10 +157,22 @@ async function checkRestrictions(
   return false;
 }
 
-function formatForCodeBlock(input: string): string {
-  const formatted = input
+type FormatFunc = (response: string) => string;
+
+export const formatNOP = (response: string) => response;
+
+export const formatForCodeBlock: FormatFunc = (response: string) => {
+  const formatted = response
     .split("\n")
     .map((line) => "    " + line)
     .join("\n");
   return formatted;
-}
+};
+
+export const formatForSummary: FormatFunc = (response: string) => {
+  const paragraphs = response.split("\n");
+  const transformedParagraphs = paragraphs
+    .map((paragraph) => "> " + paragraph)
+    .join("\n");
+  return "Summary:\n" + transformedParagraphs;
+};
