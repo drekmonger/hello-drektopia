@@ -3,7 +3,12 @@ import { Metadata } from "@devvit/protos";
 
 import { appName, reddit, ReportError, getPreviousThing } from "./common.js";
 import { AppSettings } from "./configurationSettings.js";
-import { generateAIResponse, formatNOP, formatForCodeBlock, formatForSummary } from "./generateAIResponse.js";
+import {
+  generateAIResponse,
+  formatNOP,
+  formatForCodeBlock,
+  formatForSummary,
+} from "./generateAIResponse.js";
 import { specialCommands, SpecialCommandFunc } from "./commandsSpecial.js";
 import { commands } from "./commandsUser.js";
 
@@ -13,11 +18,9 @@ type ParsedCommandResult =
   | { type: "invalid"; invalidCommand: string }
   | { type: "none" };
 
-
 export function parseCommand(body: string): ParsedCommandResult {
-  
   const commandCommonBoilerplate =
-  "You will be prompted with a comment from reddit. ";
+    "You will be prompted with a comment from reddit. ";
 
   // Remove leading and trailing white spaces
   body = body.trim();
@@ -34,8 +37,8 @@ export function parseCommand(body: string): ParsedCommandResult {
   if (command in specialCommands) {
     return {
       type: "specialcommand",
-      func: specialCommands[command].specialcommandFunction
-    }
+      func: specialCommands[command].specialcommandFunction,
+    };
   }
 
   // Check if the command is in the user command dictionary
@@ -51,14 +54,15 @@ export function parseCommand(body: string): ParsedCommandResult {
 }
 
 export function helpText(): string {
-  // Start with a friendly, casual intro message
+  // Start with a friendly intro message
   let message =
-    "Hey. Here's a list of commands you can use in this subbreddit. Simply type '!' before the command name (case doesn't matter). Have fun!\n\n";
+    "Hey. Here's a list of commands you can use in this subbreddit. Type '!' before the command name (case doesn't matter). Have fun!\n\n";
 
   // Add each special command to the message
   for (let name in specialCommands) {
-    message +=
-      `* !${name.toLocaleLowerCase()} --- ${commands[name].description}\n`;
+    message += `* !${name.toLocaleLowerCase()} --- ${
+      commands[name].description
+    }\n`;
   }
 
   // Add each user command to the message
@@ -68,7 +72,6 @@ export function helpText(): string {
     }\n`;
   }
 
-  // Return the constructed message
   return message;
 }
 
@@ -77,7 +80,6 @@ export async function handleRequestHelpAction(
   metadata: Metadata | undefined
 ): Promise<ContextActionResponse> {
   try {
-
     await reddit.sendPrivateMessage(
       {
         to: (await reddit.getCurrentUser(metadata)).username,
@@ -89,7 +91,7 @@ export async function handleRequestHelpAction(
 
     return {
       success: true,
-      message: `${appName}: Command list PMed to you!`,
+      message: `${appName}: Command list has been sent via private message.`,
     };
   } catch (error) {
     return ReportError(error);
@@ -101,7 +103,8 @@ export async function handleCommands(
   commentID: string,
   metadata: Metadata | undefined,
   settings: AppSettings
-): Promise<Boolean> {
+): Promise<ContextActionResponse> {
+
   let parsedCommand = parseCommand(body);
 
   switch (parsedCommand.type) {
@@ -116,35 +119,37 @@ export async function handleCommands(
         replyTargetId: commentID,
         thingToRead: thingToSend,
         systemPrompt: parsedCommand.prompt,
-        formatFunction: parsedCommand.codeformat ? formatForCodeBlock : formatNOP,
+        formatFunction: parsedCommand.codeformat
+          ? formatForCodeBlock
+          : formatNOP,
         metadata,
         settings,
       });
 
-      console.log(
-        `Posted an AI generated reply to comment ${commentID} in response to a user !command.`
-      );
+      const message = `Posted an AI generated reply to comment ${commentID} in response to a user !command.`
+      console.log(message)
 
-      return true;
+      return { success: true, message: message };
 
     case "specialcommand":
-      
-      await reddit.submitComment(
-        { id: commentID, text: await parsedCommand.func(body, commentID, metadata) },
+      const result = await parsedCommand.func(
+        body,
+        commentID,
+        settings,
         metadata
       );
-      console.log(
-        `Posted message to comment ${commentID} in response to a special !command.`
-      );
-      return true;
+      if ((result.success = true)) {
+        console.log(result.message);
+      }
+
+      return result;
 
     case "invalid":
       // Do absolutely nothing.
-      return true;
+      return { success: true, message: "Invalid command." };
 
     case "none":
       // Do nothing, and allow the next check to occur
-      return false;
+      return { success: false, message: "" };
   }
 }
-

@@ -7,7 +7,11 @@ import { Metadata, CommentSubmit, PostSubmit } from "@devvit/protos";
 
 import { appName, kv, reddit, ReportError, chanceTrue } from "./common.js";
 import { getValidatedSettings } from "./configurationSettings.js";
-import { generateAIResponse, formatNOP, formatForSummary } from "./generateAIResponse.js";
+import {
+  generateAIResponse,
+  formatNOP,
+  formatForSummary,
+} from "./generateAIResponse.js";
 import { handleCommands } from "./commands.js";
 
 export async function blockReplyingAction(
@@ -91,18 +95,17 @@ export async function handleCommentSubmit(
 
     const settings = await getValidatedSettings(metadata);
 
-    //check if there were any !commands in the comment
+    //check if the comment is a !command
     if (settings.enablecommands) {
-      const commandExecuted = await handleCommands(
+      const attemptCommand = await handleCommands(
         comment.body,
         commentID,
         metadata,
         settings
       );
-      if (commandExecuted) {
-        const message = `Handled user command in ${commentID}.`;
-        console.log(message);
-        return { success: true, message: message };
+
+      if (attemptCommand.success) {
+        return attemptCommand;
       }
     }
 
@@ -120,8 +123,8 @@ export async function handleCommentSubmit(
         settings,
       });
       const message = `Summarized ${commentID}.`;
-        console.log(message);
-        return { success: true, message: message };
+      console.log(message);
+      return { success: true, message: message };
     }
 
     //check for random chance of submitting comment
@@ -144,6 +147,7 @@ export async function handleCommentSubmit(
     const message = `No action taken on comment: ${commentID}.`;
     console.log(message);
     return { success: true, message: message };
+    
   } catch (error) {
     return ReportError(error);
   }
