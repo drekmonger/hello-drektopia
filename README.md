@@ -8,9 +8,7 @@ Hello-drektopia is meant to add a bit of fun and functionality to a subreddit it
 
 ## Key Features
 
-
 1. **AI Generated Responses:** The application can randomly respond to posted comments on the sub, similar to the comedy bots seen in, for example, /r/EnoughMuskSpam.
-
 
 2. **Command Responses:** The application can also respond to user !commands submitted as comments. These commands trigger AI generated content, with the context being the previous comment or post.
 
@@ -21,11 +19,11 @@ Hello-drektopia is meant to add a bit of fun and functionality to a subreddit it
 
     - For the future, CRUD operations on commands in the settings could be nice to have, so that installers of the app could add, edit, and delete their own sub-specific set of commands.
 
-
 3. **Summarization** The application can automatically summarize long comments and posts that go over a threshold of characters, similar to the summarization bot on /r/ChatGPT.
 
+4. **Translation** Via using the !translate command, users can translate reddit content into any langauge the LLM understands...which is basically every langauge. (This is still a work-in-progress for edge cases where the user selects a language that isn't real or attempts to translate nonsense.)
 
-4. **Safety Measures:** Several safeguards are in place to maintain a respectful environment and help prevent token misuse:
+5. **Safety Measures:** Several safeguards are in place to maintain a respectful environment and help prevent token misuse:
 
 
     - **Rate Limiting:** The app features both hourly and daily rate limits. Future iterations may also include user-based rate limiting.
