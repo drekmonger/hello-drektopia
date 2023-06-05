@@ -60,7 +60,7 @@ export function helpText(): string {
   // Add each special command to the message
   for (let name in specialCommands) {
     message += `* !${name.toLocaleLowerCase()} --- ${
-      commands[name].description
+      specialCommands[name].description
     }\n`;
   }
 
