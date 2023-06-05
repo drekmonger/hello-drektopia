@@ -8,7 +8,7 @@ import { Metadata, CommentSubmit, PostSubmit } from "@devvit/protos";
 import { appName, kv, reddit, ReportError, chanceTrue } from "./common.js";
 import { getValidatedSettings } from "./configurationSettings.js";
 import { generateAIResponse, formatNOP, formatForSummary } from "./generateAIResponse.js";
-import { handleCommands } from "./userCommands.js";
+import { handleCommands } from "./commands.js";
 
 export async function blockReplyingAction(
   event: PostContextActionEvent,

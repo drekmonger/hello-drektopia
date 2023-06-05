@@ -157,7 +157,7 @@ async function checkRestrictions(
   return false;
 }
 
-type FormatFunc = (response: string) => string;
+export type FormatFunc = (response: string) => string;
 
 export const formatNOP = (response: string) => response;
 

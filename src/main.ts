@@ -18,7 +18,7 @@ import {
   handlePostSubmit,
 } from "./coreHandlers.js";
 
-import { handleRequestHelpAction } from "./userCommands.js";
+import { handleRequestHelpAction } from "./commands.js";
 
 //App Setup
 Devvit.use(Devvit.Types.HTTP);
